@@ -111,10 +111,10 @@ support is required.
 Requirements: Android 14 or newer.
 
 1. Download `onscripter-new-android.apk` from the latest release.
-2. Install the APK.
-3. Make your legally obtained Umineko Project data available to the app in the
-   same way as your existing Android installation.
-4. Launch **onscripter-new**.
+2. Download all required Umineko Project files and place them in a folder titled "ONScripter-RU" on the root of your phone.
+3. Extract the required files within the folder.
+4. Install the APK.
+5. Launch **onscripter-new**.
 
 The APK contains the engine, not the game.
 
