@@ -1030,6 +1030,11 @@ void ONScripter::setGameIdentifier(const char *gameid) {
 
 void ONScripter::lookupSavePath() {
 	const char *gameid = script_h.game_identifier.c_str();
+	// These translations share the same save layout and story labels. Reuse
+	// the original English directory so existing progress stays available.
+	if (script_h.game_identifier == "UminekoPS3ficationWh" ||
+	    script_h.game_identifier == "UminekoPS3ficationRu")
+		gameid = "UminekoPS3ficationEn";
 	char gamename[20];
 	if (script_h.game_identifier.empty()) {
 		std::snprintf(gamename, sizeof(gamename), "ONScripter-%x", script_h.game_hash);

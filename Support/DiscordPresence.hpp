@@ -19,6 +19,12 @@
 #define ONS_DISCORD_PRESENCE_SUPPORTED 1
 #endif
 
+// Public application ID used by onscripter-new releases. A configure-time
+// --discord-app-id still overrides it, as do the runtime option/environment.
+#ifndef ONS_DISCORD_APP_ID
+#define ONS_DISCORD_APP_ID "1517334948967747794"
+#endif
+
 class DiscordPresence {
 public:
 	struct Activity {

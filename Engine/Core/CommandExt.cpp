@@ -229,9 +229,11 @@ int ONScripter::verifyFilesCommand() {
 		auto apiver    = infoNode.find("apiver");
 		auto date      = infoNode.find("date");
 
+		// The manifest records the engine release that generated it. A newer
+		// release can still verify the same format and API without regenerating it.
 		if (game != infoNode.end() && hash != infoNode.end() && ver != infoNode.end() && apiver != infoNode.end() &&
 		    date != infoNode.end() && game->second.size() > 0 && hash->second == "size" &&
-			ver->second == ONS_VERSION && apiver->second == ONS_API) {
+			!ver->second.empty() && apiver->second == ONS_API) {
 
 			// Try an entire match or a wild-card match.
 			looksFine = game->second.find(script_h.game_identifier) != std::string::npos;
@@ -1676,25 +1678,25 @@ int ONScripter::relaunchCommand() {
 	ctrl.deinit();
 
 	std::vector<char *> newArgv;
-	newArgv.emplace_back(FileIO::safePath(argv[0], false, true));
+	// restartApp quotes Windows arguments itself; pass the original values.
+	newArgv.emplace_back(copystr(argv[0]));
 
 	bool hasRoot = false;
 
 	for (int i = 1; i < argc; i++) {
 		newArgv.emplace_back(copystr(argv[i]));
 
-		if ((equalstr("--root", argv[i]) || equalstr("--tmp-root", argv[i])) && i + 1 < argc) {
+		if ((equalstr("-r", argv[i]) || equalstr("--root", argv[i]) || equalstr("--tmp-root", argv[i])) && i + 1 < argc) {
 			hasRoot = true;
-			i++;
-			newArgv.emplace_back(FileIO::safePath(argv[i], true, true));
-		} else if (equalstr("--save", argv[i]) && i + 1 < argc) {
-			newArgv.emplace_back(FileIO::safePath(argv[i], true, true));
+			newArgv.emplace_back(copystr(argv[++i]));
+		} else if ((equalstr("-s", argv[i]) || equalstr("--save", argv[i])) && i + 1 < argc) {
+			newArgv.emplace_back(copystr(argv[++i]));
 		}
 	}
 
 	if (!hasRoot) {
 		newArgv.emplace_back(copystr("--tmp-root"));
-		newArgv.emplace_back(FileIO::safePath(script_path, true, true));
+		newArgv.emplace_back(copystr(script_path));
 	}
 
 	newArgv.emplace_back(nullptr);

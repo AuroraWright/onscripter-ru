@@ -130,6 +130,13 @@ support for saves created by the preceding ONScripter-RU-based builds. As with
 any engine or script update, keeping a backup of your saves and game directory
 is recommended.
 
+English, Witch Hunt, and Russian now share the `UminekoPS3ficationEn` save
+folder. Existing English saves and progress are used automatically. If your
+progress is in a separate `UminekoPS3ficationWh` or `UminekoPS3ficationRu`
+folder, back up all profiles and copy your preferred profile's contents into
+`UminekoPS3ficationEn` before switching languages. Separate profiles are not
+merged automatically.
+
 This fork deliberately favors Umineko Project over compatibility with unrelated
 ONScripter games. For other titles, use ONScripter-RU or the engine recommended
 by that project.

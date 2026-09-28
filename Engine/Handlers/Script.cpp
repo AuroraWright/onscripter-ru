@@ -8,6 +8,7 @@
  */
 
 #include "Engine/Handlers/Script.hpp"
+#include "Engine/Handlers/UminekoConfig.hpp"
 #include "Engine/Core/ONScripter.hpp"
 #include "Support/Unicode.hpp"
 #include "Support/FileIO.hpp"
@@ -1250,8 +1251,13 @@ int ScriptHandler::readScript() {
 	script_data.emplace_back('\0');
 	freearr(&script_buffer); // Why did we decide to free the buffer here?
 	script_buffer_length = preprocessScript(script_data.data(), script_data.size());
-	script_buffer        = copyarr(reinterpret_cast<char *>(script_data.data()), script_buffer_length + 1);
 	game_hash            = static_cast<uint32_t>(script_buffer_length); // Reasonable "hash" value
+	if (const auto addedLabels = extendUminekoConfig(script_data, script_buffer_length)) {
+		num_of_labels += addedLabels;
+		script_buffer_length = script_data.size() - 1;
+		sendToLog(LogLevel::Info, "Loaded shared Umineko Config menu\n");
+	}
+	script_buffer = copyarr(reinterpret_cast<char *>(script_data.data()), script_buffer_length + 1);
 
 	//sendToLog(LogLevel::Info,"num_of_labels %d\n",num_of_labels);
 
