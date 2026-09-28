@@ -108,7 +108,7 @@ support is required.
 
 ### Android
 
-Requirements: Android 14 or newer.
+Requirements: Android 11 or newer.
 
 1. Download `onscripter-new-android.apk` from the latest release.
 2. Download all required Umineko Project files and place them in a folder titled "ONScripter-RU" on the root of your phone.
