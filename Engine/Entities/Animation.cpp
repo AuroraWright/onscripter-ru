@@ -348,22 +348,21 @@ void AnimationInfo::setCell(int cell) {
 
 float2 AnimationInfo::findOpaquePoint(RenderRect *clip) {
 	//find the first opaque-enough pixel position for transbtn
-	if (!image_surface)
-		image_surface = GPU_CopySurfaceFromImage(gpu_image);
-	int cell_width    = vertical_cells ? image_surface->w : image_surface->w / num_of_cells;
-	int cell_height   = vertical_cells ? image_surface->h / num_of_cells : image_surface->h;
+	if ((!image_surface && !gpu_image) || num_of_cells <= 0)
+		return {0, 0};
+	const int width = image_surface ? image_surface->w : gpu_image->w;
+	const int height = image_surface ? image_surface->h : gpu_image->h;
+	int cell_width    = vertical_cells ? width : width / num_of_cells;
+	int cell_height   = vertical_cells ? height / num_of_cells : height;
 	RenderRect cliprect = {0, 0, static_cast<float>(cell_width), static_cast<float>(cell_height)};
 	if (clip)
 		cliprect = *clip;
-
-	const int psize = 4;
-	uint8_t *alphap = static_cast<uint8_t *>(image_surface->pixels) + 3;
 
 	float2 ret = {0, 0};
 
 	for (int i = cliprect.y; i < cliprect.h; ++i) {
 		for (int j = cliprect.x; j < cliprect.w; ++j) {
-			int alpha = *(alphap + (image_surface->w * i + j) * psize);
+			int alpha = getPixelAlpha(j, i, 0);
 			if (alpha > TRANSBTN_CUTOFF) {
 				ret.x = j;
 				ret.y = i;
@@ -379,7 +378,7 @@ float2 AnimationInfo::findOpaquePoint(RenderRect *clip) {
 		for (int j = xstart; j < cliprect.w; ++j) {
 			bool is_opaque = true;
 			for (int k = 0; k < num_of_cells; ++k) {
-				int alpha = *(alphap + (image_surface->w * i + (vertical_cells ? cell_height * cell_width : cell_width) * k + j) * psize);
+				int alpha = getPixelAlpha(j, i, k);
 				if (alpha <= TRANSBTN_CUTOFF) {
 					is_opaque = false;
 					break;
@@ -399,14 +398,30 @@ float2 AnimationInfo::findOpaquePoint(RenderRect *clip) {
 	return ret;
 }
 
-int AnimationInfo::getPixelAlpha(int x, int y) {
+int AnimationInfo::getPixelAlpha(int x, int y, int cell) {
+	if ((!image_surface && !gpu_image) || num_of_cells <= 0)
+		return 0;
+	const int width = image_surface ? image_surface->w : gpu_image->w;
+	const int height = image_surface ? image_surface->h : gpu_image->h;
+	if (cell < 0)
+		cell = current_cell;
+	const int cellWidth = vertical_cells ? width : width / num_of_cells;
+	const int cellHeight = vertical_cells ? height / num_of_cells : height;
+	if (x < 0 || y < 0 || x >= cellWidth || y >= cellHeight || cell >= num_of_cells)
+		return 0;
+	x += vertical_cells ? 0 : cellWidth * cell;
+	y += vertical_cells ? cellHeight * cell : 0;
+#if defined(ONS_USE_SDL3)
+	if (!image_surface)
+		return GPU_GetPixelAlpha(gpu_image, x, y);
+#else
 	if (!image_surface)
 		image_surface = GPU_CopySurfaceFromImage(gpu_image);
-	const int psize       = 4;
-	const int total_width = image_surface->w * psize;
-	const int cell_off    = (vertical_cells ? total_width * image_surface->h : total_width) * current_cell / num_of_cells;
-
-	return *(static_cast<uint8_t *>(image_surface->pixels) + cell_off + total_width * y + x * psize + 3);
+#endif
+	if (!image_surface)
+		return 0;
+	const int bytes = onsSurfaceBytesPerPixel(image_surface);
+	return bytes == 4 ? *(static_cast<const uint8_t *>(image_surface->pixels) + image_surface->pitch * y + x * bytes + 3) : 255;
 }
 
 void AnimationInfo::calcAffineMatrix(int script_width, int script_height) {

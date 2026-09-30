@@ -336,7 +336,7 @@ int Mix_VolumeMusicFloat(float volume) {
 	return previous;
 }
 
-Mix_Chunk *Mix_LoadWAV_RW(SDL_RWops *src, int freesrc) {
+Mix_Chunk *Mix_LoadWAV_RW(SDL_RWops *src, int freesrc, size_t maxDecodedBytes) {
 	if (!ensureAudioReady())
 		return nullptr;
 
@@ -358,7 +358,8 @@ Mix_Chunk *Mix_LoadWAV_RW(SDL_RWops *src, int freesrc) {
 		if (bytes == 0)
 			break;
 		const size_t required = decodedSize + static_cast<size_t>(bytes);
-		if (required > static_cast<size_t>(std::numeric_limits<Uint32>::max())) {
+		if (required > static_cast<size_t>(std::numeric_limits<Uint32>::max()) ||
+		    (maxDecodedBytes && required > maxDecodedBytes)) {
 			SDL_free(decoded);
 			MIX_DestroyAudioDecoder(decoder);
 			return nullptr;
@@ -366,6 +367,8 @@ Mix_Chunk *Mix_LoadWAV_RW(SDL_RWops *src, int freesrc) {
 		if (required > decodedCapacity) {
 			size_t newCapacity = std::max(required, decodedCapacity ? decodedCapacity * 2 : buffer.size());
 			newCapacity        = std::min(newCapacity, static_cast<size_t>(std::numeric_limits<Uint32>::max()));
+			if (maxDecodedBytes)
+				newCapacity = std::min(newCapacity, maxDecodedBytes);
 			void *newDecoded   = SDL_realloc(decoded, newCapacity);
 			if (!newDecoded) {
 				SDL_free(decoded);
@@ -387,6 +390,15 @@ Mix_Chunk *Mix_LoadWAV_RW(SDL_RWops *src, int freesrc) {
 
 	Mix_Chunk *chunk = new Mix_Chunk();
 	chunk->alen      = static_cast<Uint32>(decodedSize);
+	// Decoding grows geometrically. Retain only the finished samples, and
+	// account for the old capacity if the allocator cannot shrink in place.
+	if (decodedCapacity > decodedSize) {
+		if (void *compact = SDL_realloc(decoded, decodedSize)) {
+			decoded = static_cast<Uint8 *>(compact);
+			decodedCapacity = decodedSize;
+		}
+	}
+	chunk->capacityBytes = decodedCapacity;
 	chunk->abuf      = decoded;
 	chunk->allocated = 1;
 	chunk->audio     = MIX_LoadRawAudioNoCopy(mixer, chunk->abuf, chunk->alen, &mixerSpec, false);

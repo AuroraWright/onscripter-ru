@@ -330,11 +330,19 @@ std::unique_ptr<MediaProcController::Decoder> MediaProcController::findDecoder(A
 					throw std::runtime_error("Failed to create AVCodecContext");
 				}
 				switch (type) {
-					case AVMEDIA_TYPE_VIDEO:
-						// Starting with 6f69f7a8bf6a0d013985578df2ef42ee6b1c7994 ffmpeg no longer sets decoding thread count to auto.
-						// Specify it ourselves.
-						codecContext->thread_count = 0;
+					case AVMEDIA_TYPE_VIDEO: {
+						// Frame-threaded decoders retain reference frames per worker.
+						// Bound that hidden queue as well as our ready-frame queue.
+#if defined(ONS_USE_SDL3)
+						const int cores = SDL_GetNumLogicalCPUCores();
+#else
+						const int cores = SDL_GetCPUCount();
+#endif
+						const size_t frameBytes = static_cast<size_t>(codecContext->width) * codecContext->height * 4;
+						codecContext->thread_count = static_cast<int>(memoryBudget().bufferedItems(
+						    frameBytes, 1, static_cast<size_t>(std::clamp(cores, 1, 8))));
 						return Decoder::create<VideoDecoder>(codecContext, stream);
+					}
 					case AVMEDIA_TYPE_AUDIO:
 						return Decoder::create<AudioDecoder>(codecContext, stream);
 					case AVMEDIA_TYPE_SUBTITLE:
@@ -381,7 +389,6 @@ bool MediaProcController::loadVideo(const char *filename, unsigned audioStream, 
 		return false;
 	}
 
-	frameQueueSem[VideoEntry] = SDL_CreateSemaphore(VideoFrameBufferSize);
 	frameQueueSem[AudioEntry] = SDL_CreateSemaphore(AudioPacketBufferSize);
 
 	frameQueuemutex[VideoEntry] = SDL_CreateMutex();
@@ -409,13 +416,20 @@ bool MediaProcController::loadPresentation(const RenderRect &rect, bool loop) {
 	/* Prepare SW scale */
 	auto vdec = static_cast<VideoDecoder *>(decoders[VideoEntry].get());
 	if (vdec->initSwsContext(rect.w, alphaMasked ? rect.h * 2 : rect.h, nullptr, false)) {
+		// Budget ready frames by resolution, including retained decoder planes.
+		// Two queued frames preserve producer/consumer progress at any budget.
+		const auto context = vdec->codecContext;
+		const size_t sourceBytes = static_cast<size_t>(context->width) * context->height * 4;
+		const size_t outputBytes = static_cast<size_t>(rect.w) * (alphaMasked ? rect.h * 2 : rect.h) * 4;
+		const size_t frameCount = memoryBudget().bufferedItems(std::max(sourceBytes, outputBytes), 2, VideoFrameBufferSize);
+		frameQueueSem[VideoEntry] = SDL_CreateSemaphore(static_cast<uint32_t>(frameCount));
 
 		/* Allocate surfaces */
 		imagePool         = std::make_unique<TempImagePool>();
 		imagePool->size.x = rect.w;
 		imagePool->size.y = alphaMasked ? rect.h * 2 : rect.h;
 		if (!vdec->directPlaneConversion)
-			imagePool->addImages(VideoFrameBufferSize);
+			imagePool->addImages(static_cast<int>(frameCount));
 
 		initVideoTimecodesLock = SDL_CreateSemaphore(0);
 		async.loadPacketArrays();

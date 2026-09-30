@@ -416,6 +416,9 @@ void DialogueController::SegmentRenderingAction::onExpired() {
 bool DialogueController::TextRenderingMonitorAction::expired() {
 	return false;
 }
+uint64_t DialogueController::TextRenderingMonitorAction::nextUpdateNanos() {
+	return lastCompletedSegment == dlgCtrl.dialogueRenderState.segmentIndex ? WorkSchedule::Never : 0;
+}
 void DialogueController::TextRenderingMonitorAction::run() {
 	if (lastCompletedSegment == dlgCtrl.dialogueRenderState.segmentIndex) {
 		return;
@@ -1222,10 +1225,17 @@ void DialogueController::renderPiece(TextRenderingState &state, DialoguePiece &p
 	}
 }
 
-void DialogueController::advanceDialogueRendering(uint64_t ns) {
+bool DialogueController::hasRenderingWork() const {
 	if (!dialogueIsRendering)
-		return;
-	if (dialogueRenderState.segmentIndex == -1)
+		return false;
+	for (int segNo = 0; segNo <= dialogueRenderState.segmentIndex; ++segNo)
+		if (!dialogueRenderState.segments[segNo].timedGlyphs.empty())
+			return true;
+	return false;
+}
+
+void DialogueController::advanceDialogueRendering(uint64_t ns) {
+	if (!hasRenderingWork())
 		return;
 
 	for (int segNo = 0; segNo <= dialogueRenderState.segmentIndex; segNo++) {

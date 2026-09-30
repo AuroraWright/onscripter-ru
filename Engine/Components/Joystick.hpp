@@ -165,6 +165,7 @@ public:
 #endif
 	libusb_context *getUsbContext();
 	void handleUsbEvents();
+	bool needsPolling() const { return !nativeControllers.empty(); }
 };
 
 extern JoystickController joyCtrl;

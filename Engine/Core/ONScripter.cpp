@@ -593,6 +593,7 @@ void ONScripter::initSDL() {
 			    default:
 				    break;
 		    }
+		    mainThreadWork.notify();
 		    return true;
 	    },
 	    nullptr);
@@ -938,6 +939,7 @@ void ONScripter::enableCDAudio() {
 }
 
 void ONScripter::cursorState(bool show) {
+	cursorVisible = show;
 	onsShowCursor(show);
 #if defined(MACOSX) && defined(USE_OBJC)
 	nativeCursorState(show);
@@ -1377,6 +1379,7 @@ void ONScripter::resetSub() {
 		async.endThreads();
 		async.startEventQueue();
 	}
+	clearImageAssets();
 
 	for (i = 0; i < script_h.global_variable_border; i++)
 		script_h.getVariableData(i).reset(false);
@@ -1464,6 +1467,7 @@ void ONScripter::resetSub() {
 }
 
 void ONScripter::resetFlags() {
+	idle_game_state_advance_nanos = 0;
 	skip_enabled   = true;
 	automode_flag  = false;
 	autoclick_time = 0;
@@ -2158,7 +2162,7 @@ void ONScripter::executeLabel() {
 						//We must return control to waitEvent here to give the screen a chance to update when it is time
 						//  (Otherwise long script for-loops etc may never give script a chance to waitEvent and hence refresh the screen)
 						//We'll pass nopPreferred so that we come back here immediately unless we really do need to draw
-						waitEvent(0, true);
+						waitEvent(0, scriptExecutionPermitted() || dlgCtrl.wantsControl());
 					}
 				}
 			}
@@ -2224,6 +2228,8 @@ void ONScripter::executeLabel() {
 				script_h.debugCommandLog.push_back(logStream.str());
 				
 				prevEnd = end;*/
+			} else {
+				waitForPendingWork(250 * WorkSchedule::Millisecond);
 			}
 
 			// These need to execute in both cases.
@@ -2955,45 +2961,69 @@ void ONScripter::cleanImages() {
 	gpu.clearImagePools(true);
 }
 
+void ONScripter::serviceMemoryBudget() {
+	auto &budget = memoryBudget();
+	budget.pollPressure();
+	if (imageAssets.servicing)
+		return;
+	size_t needed = 0;
+	const auto trim = budget.takeTrimRequest(&needed);
+	if (trim == MemoryBudget::Trim::None)
+		return;
+	if (trim == MemoryBudget::Trim::Idle) {
+		// Keep buffers used by consecutive frames, but let completed effects
+		// and videos give their scratch memory back during ordinary play.
+		constexpr uint64_t idleMilliseconds = 5000;
+		const uint64_t end = WorkSchedule::now() + 2 * WorkSchedule::Millisecond;
+		GPU_TrimIdleResources(idleMilliseconds);
+		while (WorkSchedule::now() < end &&
+		       (gpu.evictIdlePooledImage(idleMilliseconds) || media.evictIdleImage(idleMilliseconds))) {}
+		return;
+	}
+	const auto before = budget.snapshot();
+	const bool pressure = trim == MemoryBudget::Trim::Pressure;
+	// Workers keep their own data alive. Only unclaimed work may be cancelled;
+	// a foreground waiter must still receive its completion.
+	if (pressure)
+		imageAssets.cancelPrefetch();
+	// Reclaim only the requested headroom, one allocation at a time. Ordinary
+	// cache misses must not clear scratch buffers being reused every frame.
+	const size_t target = pressure ? 0 : before.limit - std::min(needed, before.limit);
+	const uint64_t end = WorkSchedule::now() + 2 * WorkSchedule::Millisecond;
+	bool evicted;
+	do {
+		evicted = false;
+		if (budget.snapshot().used <= target)
+			break;
+		evicted = imageAssets.evictOne();
+		if (!evicted) {
+			Lock lock(&imageCache);
+			evicted = imageCache.evictOne();
+		}
+		if (!evicted) {
+			Lock lock(&soundCache);
+			evicted = soundCache.evictOne();
+		}
+		if (!evicted)
+			evicted = gpu.evictUnusedPooledImage(pressure) || media.evictUnusedImage(pressure);
+	} while (evicted && WorkSchedule::now() < end);
+	const auto after = budget.snapshot();
+	if (evicted && after.used > target)
+		budget.requestTrim(pressure, needed);
+	if (pressure || onsSDLGetEnv("ONS_MEMORY_TELEMETRY")) {
+		sendToLog(LogLevel::Info, "Memory budget: retained=%llu -> %llu KB, limit=%llu KB, peak=%llu KB, admissions declined=%llu\n",
+		          static_cast<unsigned long long>(before.used / 1024),
+		          static_cast<unsigned long long>(after.used / 1024),
+		          static_cast<unsigned long long>(after.limit / 1024),
+		          static_cast<unsigned long long>(after.peak / 1024),
+		          static_cast<unsigned long long>(after.denied));
+	}
+}
+
 #if defined(DROID)
 void ONScripter::droidTrimMemory() {
-	// What the moreram script command does when the game itself notices it is
-	// short, done when Android says so instead.
-	//
-	// This matters more here than on a desktop. A backgrounded process holding
-	// a gigabyte is the first thing the low memory killer reaches for, and the
-	// bulk of it -- pooled render targets and cached textures -- is GPU memory,
-	// which the system cannot swap or compress. Handing it back is the only way
-	// the number comes down, and everything released here is rebuilt on demand.
-	{
-		Lock lock(&imageCache);
-		imageCache.clearAll();
-	}
-	{
-		Lock lock(&soundCache);
-		soundCache.clearAll();
-	}
-
-	auto reportImageMemory = [](const char *when) {
-		size_t images = 0, textureBytes = 0, pixelBytes = 0;
-		GPU_GetLiveImageMemory(images, textureBytes, pixelBytes);
-		sendToLog(LogLevel::Info, "Trim %s: %llu live images, %llu KB texture, %llu KB CPU pixels\n",
-		          when,
-		          static_cast<unsigned long long>(images),
-		          static_cast<unsigned long long>(textureBytes / 1024),
-		          static_cast<unsigned long long>(pixelBytes / 1024));
-	};
-
-	reportImageMemory("before");
-	gpu.logPooledImageCensus();
-	sendToLog(LogLevel::Info, "  largest live images:\n");
-	GPU_LogLargestLiveImages(10);
-
-	const size_t freedBytes = gpu.releaseUnusedPooledImages();
-	sendToLog(LogLevel::Info, "Trim: released %llu KB of pooled images and cleared the caches\n",
-	          static_cast<unsigned long long>(freedBytes / 1024));
-	reportImageMemory("after");
-	gpu.logPooledImageCensus();
+	memoryBudget().requestTrim(true);
+	serviceMemoryBudget();
 }
 #endif
 

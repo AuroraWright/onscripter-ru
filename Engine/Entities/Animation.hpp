@@ -296,7 +296,7 @@ public:
 
 	void setCell(int cell);
 	float2 findOpaquePoint(RenderRect *clip = nullptr);
-	int getPixelAlpha(int x, int y);
+	int getPixelAlpha(int x, int y, int cell = -1);
 
 	void calcAffineMatrix(int script_width, int script_height);
 

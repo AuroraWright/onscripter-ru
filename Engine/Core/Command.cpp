@@ -1211,6 +1211,7 @@ int ONScripter::savescreenshotCommand() {
 				auto rwops = SDL_RWFromFP(fp, SDL_TRUE);
 				GPU_SaveImage_RW(screenshot_gpu, rwops, true, format);
 #endif
+				dropCache(nullptr, filename);
 			} else {
 				sendToLog(LogLevel::Error, "savescreenshot: failed to save the screenshot.\n");
 			}

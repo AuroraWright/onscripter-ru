@@ -43,6 +43,7 @@ AsyncController::AsyncController()
       imageCacheQueue("imageCacheQueue"),
       soundCacheQueue("soundCacheQueue"),
       loadImageQueue("loadImageQueue", false /*don't quit!*/),
+      imageAssetQueue("imageAssetQueue", false),
       loadPacketArraysQueue("loadPacketArraysQueue", false),
       loadFramesQueue{{"loadVideoFramesQueue", false},
                       {"loadAudioFramesQueue", false},
@@ -52,6 +53,7 @@ AsyncController::AsyncController()
 	imageCacheQueue.threadLoopFunction                                  = imageCacheThreadLoop;
 	soundCacheQueue.threadLoopFunction                                  = soundCacheThreadLoop;
 	loadImageQueue.threadLoopFunction                                   = loadImageThreadLoop;
+	imageAssetQueue.threadLoopFunction                                  = imageAssetThreadLoop;
 	loadPacketArraysQueue.threadLoopFunction                            = loadPacketArraysThreadLoop;
 	loadFramesQueue[MediaProcController::VideoEntry].threadLoopFunction = loadVideoFramesThreadLoop;
 	loadFramesQueue[MediaProcController::AudioEntry].threadLoopFunction = loadAudioFramesThreadLoop;
@@ -62,6 +64,7 @@ AsyncController::AsyncController()
 	queueCollection.push_back(&imageCacheQueue);
 	queueCollection.push_back(&soundCacheQueue);
 	queueCollection.push_back(&loadImageQueue);
+	queueCollection.push_back(&imageAssetQueue);
 	queueCollection.push_back(&loadFramesQueue[MediaProcController::VideoEntry]);
 	queueCollection.push_back(&loadFramesQueue[MediaProcController::AudioEntry]);
 	queueCollection.push_back(&loadFramesQueue[MediaProcController::SubsEntry]);
@@ -72,6 +75,7 @@ AsyncController::AsyncController()
 
 void AsyncController::endThreads() {
 	threadShutdownRequested = true;
+	mainThreadWork.notify();
 
 	for (AsyncInstructionQueue *qPtr : queueCollection) {
 		sendToLog(LogLevel::Info, "[Info] AsyncController is going to kill %s-based thread\n", qPtr->name);
@@ -81,7 +85,7 @@ void AsyncController::endThreads() {
 	threadShutdownRequested = false;
 }
 
-void AsyncController::queue(std::unique_ptr<AsyncInstruction> inst) {
+void AsyncController::queue(std::unique_ptr<AsyncInstruction> inst, bool priority) {
 	AsyncInstructionQueue *instQueue = inst->getInstructionQueue();
 	// Runs thread if it is not already running
 	SDL_AtomicLock(&instQueue->lock);
@@ -92,7 +96,10 @@ void AsyncController::queue(std::unique_ptr<AsyncInstruction> inst) {
 		SDL_WaitThread(finishedThread, nullptr);
 		SDL_AtomicLock(&instQueue->lock);
 	}
-	instQueue->q.push_back(std::move(inst));
+	if (priority)
+		instQueue->q.push_front(std::move(inst));
+	else
+		instQueue->q.push_back(std::move(inst));
 	if (!instQueue->quitOnEmpty)
 		SDL_SemPost(instQueue->instructionsWaiting);
 	if (!instQueue->running) {
@@ -143,15 +150,21 @@ int AsyncController::asyncLoop(AsyncInstructionQueue &queue) {
 				ptr->execute(); // Do the actual work
 			} catch (ThreadTerminate &) {
 				SDL_SemPost(queue.resultsWaiting);
+				mainThreadWork.notify();
 				break;
 			}
 
 			SDL_AtomicLock(&queue.lock);
-			if (!queue.quitOnEmpty && queue.hasQueue)
+			if (!queue.quitOnEmpty && queue.hasQueue) {
 				SDL_SemPost(queue.resultsWaiting);
+				mainThreadWork.notify();
+			}
 			if (threadShutdownRequested || (queue.q.empty() && queue.quitOnEmpty)) {
+				// Publish completion under the same lock used by queue(). Otherwise
+				// a producer can append work to a thread that is about to exit.
+				queue.running = false;
 				SDL_AtomicUnlock(&queue.lock);
-				break;
+				return 0;
 			}
 		}
 		SDL_AtomicUnlock(&queue.lock);
@@ -293,7 +306,7 @@ void VirtualMutexes::debugJoin(int debug1, int debug2) {
 /* ---------------- Load image cache instruction ----------------- */
 
 void LoadImageCacheInstruction::execute() {
-	ons.loadImageIntoCache(id, filename, allow_rgb);
+	ons.loadImageIntoCache(id, filename, allow_rgb, true);
 }
 
 AsyncInstructionQueue *LoadImageCacheInstruction::getInstructionQueue() {
@@ -331,6 +344,28 @@ int soundCacheThreadLoop(void *arg) {
 }
 
 /* ----------------- Load image instruction ----------------- */
+
+void PrepareImageInstruction::execute() {
+	ons.prepareImageAsset(job);
+}
+
+AsyncInstructionQueue *PrepareImageInstruction::getInstructionQueue() {
+	return &ac->imageAssetQueue;
+}
+
+void AsyncController::prepareImage(std::shared_ptr<ImageAssetJob> job, bool priority) {
+	SDL_AtomicLock(&imageAssetQueue.lock);
+	std::erase_if(imageAssetQueue.q, [](const auto &instruction) {
+		return static_cast<PrepareImageInstruction *>(instruction.get())->job->cancelled.load(std::memory_order_relaxed);
+	});
+	SDL_AtomicUnlock(&imageAssetQueue.lock);
+	queue(std::make_unique<PrepareImageInstruction>(this, std::move(job)), priority);
+}
+
+int imageAssetThreadLoop(void *arg) {
+	auto *ac = static_cast<AsyncController *>(arg);
+	return ac->asyncLoop(ac->imageAssetQueue);
+}
 
 void LoadImageInstruction::execute() {
 	ons.buildAIImage(aiPtr);

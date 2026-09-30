@@ -1071,8 +1071,8 @@ fi
 
 # Enable boosted compilation with clang or anything but MINGW on Windows
 # GCC on Windows causes build failures otherwise.
-if [ "$(getCC)" != "gcc" ] || [ "$(getHost)" != "win32" ]; then
-    MAKEOPTS="$MAKEOPTS -j $(getconf _NPROCESSORS_ONLN)"
+if [ -z "$MAKEOPTS" ] && { [ "$(getCC)" != "gcc" ] || [ "$(getHost)" != "win32" ]; }; then
+    MAKEOPTS="-j $(getconf _NPROCESSORS_ONLN)"
 fi
 
 if [[ ! "$type" = "meta" ]]; then

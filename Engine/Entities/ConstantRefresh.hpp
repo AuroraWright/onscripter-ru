@@ -13,6 +13,7 @@
 #include "Engine/Components/DynamicProperty.hpp"
 #include "Support/KeyState.hpp"
 #include "Support/Clock.hpp"
+#include "Support/WorkScheduler.hpp"
 
 #include "Support/SDLCompat.hpp"
 
@@ -83,6 +84,7 @@ public:
 	}
 	virtual bool expired() = 0;
 	virtual void run() {}
+	virtual uint64_t nextUpdateNanos() { return 0; }
 	virtual void advance(uint64_t ns) {
 		clock.tickNanos(ns);
 	}
@@ -141,6 +143,7 @@ template <class T>
 class AbstractWaitAction : public TypedConstantRefreshAction<T> {
 public:
 	int advanceProperties{0};
+	uint64_t nextUpdateNanos() override { return this->clock.remainingNanos(); }
 	bool handlesEvent(Uint32 eventType) const override {
 		return isInputEvent(eventType);
 	}
@@ -167,6 +170,7 @@ public:
 	}
 	uint32_t voiceDelayMs{0};
 	bool expired() override;
+	uint64_t nextUpdateNanos() override { return countDownStarted ? clock.remainingNanos() : WorkSchedule::Never; }
 };
 
 class QueuedSoundAction : public TypedConstantRefreshAction<QueuedSoundAction> {
@@ -184,6 +188,7 @@ public:
 		return false;
 	}
 	bool expired() override;
+	uint64_t nextUpdateNanos() override { return countDownStarted ? clock.remainingNanos() : WorkSchedule::Never; }
 	void onExpired() override;
 };
 
@@ -194,6 +199,7 @@ public:
 	ButtonState buttonState;
 	bool del_flag{false};
 	bool timer_set{false};
+	uint64_t nextUpdateNanos() override { return timer_set ? clock.remainingNanos() : WorkSchedule::Never; }
 	bool voiced_txtbtnwait{false};
 	bool final_voiced_txtbtnwait{false};
 	bool expired() override {
@@ -219,6 +225,7 @@ public:
 		return isInputEvent(eventType) || eventType == SDL_MOUSEMOTION || eventType == ONS_CHUNK_EVENT;
 	}
 	bool expired() override { return false; }
+	uint64_t nextUpdateNanos() override { return WorkSchedule::Never; }
 	void keepAlive() { terminated = false; }
 	ButtonState buttonState;
 };

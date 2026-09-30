@@ -99,7 +99,7 @@ Requirements: 64-bit Windows 10 or newer.
 1. Download `onscripter-new-windows-x86_64.zip` from the latest release.
 2. Back up your game folder and saves.
 3. Extract the archive into your Umineko Project folder, allowing it to replace
-   the included engine, English script, and maintained loose assets.
+   the included engine, language scripts, and maintained loose assets.
 4. Run `onscripter-new.exe`.
 
 The Windows build is self-contained; no separate SDL or Vulkan runtime files
@@ -116,7 +116,9 @@ Requirements: Android 11 or newer.
 4. Install the APK.
 5. Launch **onscripter-new**.
 
-The APK contains the engine, not the game.
+The APK contains the engine, not the game. Extract `umineko-menu-update.zip`
+from the same release into your game folder to install the music-title, Tips,
+Grimoire, and Config script fixes. These files are also in the Windows package.
 
 ### Verifying downloads
 

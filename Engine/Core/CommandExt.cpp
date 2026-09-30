@@ -2136,15 +2136,8 @@ int ONScripter::moreramCommand() {
 	int lower_limit = script_h.readInt();
 
 	if (ram_limit <= lower_limit) {
-		{
-			Lock lock(&imageCache);
-			imageCache.clearAll();
-		}
-		{
-			Lock lock(&soundCache);
-			soundCache.clearAll();
-		}
-		gpu.clearImagePools();
+		memoryBudget().requestTrim(true);
+		serviceMemoryBudget();
 #ifdef IOS
 		// Do it, I said!
 		malloc_zone_pressure_relief(nullptr, 0);

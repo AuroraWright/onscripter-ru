@@ -35,6 +35,7 @@
 		int allocated{0};
 		Uint8 *abuf{nullptr};
 		Uint32 alen{0};
+		size_t capacityBytes{0};
 		Uint8 volume{MIX_MAX_VOLUME};
 		MIX_Audio *audio{nullptr};
 		bool quickRaw{false};
@@ -55,7 +56,7 @@
 	int Mix_VolumeMusic(int volume);
 	int Mix_VolumeFloat(int channel, float volume);
 	int Mix_VolumeMusicFloat(float volume);
-	Mix_Chunk *Mix_LoadWAV_RW(SDL_RWops *src, int freesrc);
+	Mix_Chunk *Mix_LoadWAV_RW(SDL_RWops *src, int freesrc, size_t maxDecodedBytes = 0);
 	Mix_Chunk *Mix_QuickLoad_RAW(Uint8 *mem, Uint32 len);
 	void Mix_FreeChunk(Mix_Chunk *chunk);
 	int Mix_RegisterEffect(int chan, Mix_EffectFunc_t f, Mix_EffectDone_t d, void *arg);

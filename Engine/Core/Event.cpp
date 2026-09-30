@@ -62,12 +62,6 @@ const uint64_t NANOS_PER_MILLISECOND{1000000ULL};
 const uint64_t STALE_FRAME_BASELINE_NS{250ULL * NANOS_PER_MILLISECOND};
 const uint64_t FPS_DISPLAY_UPDATE_INTERVAL_NS{250ULL * NANOS_PER_MILLISECOND};
 const uint64_t MAX_FRAME_TAIL_COMPENSATION_NS{2ULL * NANOS_PER_MILLISECOND};
-const uint64_t PRECISE_SLEEP_GUARD_NS{1ULL * NANOS_PER_MILLISECOND};
-const uint64_t PRECISE_SLEEP_MIN_NS{2ULL * NANOS_PER_MILLISECOND};
-#if !defined(ONS_USE_SDL3)
-const uint64_t COARSE_SLEEP_FRAME_MIN_NS{10ULL * NANOS_PER_MILLISECOND};
-const uint64_t COARSE_SLEEP_REMAINING_MIN_NS{8ULL * NANOS_PER_MILLISECOND};
-#endif
 #if !defined(ONS_USE_SDL3)
 const float TOUCH_ACTION_THRESHOLD_X = 0.1;
 const float TOUCH_ACTION_THRESHOLD_Y = 0.15;
@@ -86,6 +80,8 @@ struct FramePacingTelemetry {
 	uint64_t preciseSleepCalls{0};
 	uint64_t coarseSleepCalls{0};
 	uint64_t spinPolls{0};
+	uint64_t idleWaits{0};
+	uint64_t idleNanos{0};
 	uint64_t fpsDisplaySamples{0};
 	uint64_t fpsDisplayTotalFrameNanos{0};
 	uint64_t fpsDisplayMaxFrameNanos{0};
@@ -462,9 +458,7 @@ void ONScripter::flushEvent() {
 }
 
 static uint64_t highResolutionTicksNanos() {
-	static const uint64_t frequency = SDL_GetPerformanceFrequency();
-	return static_cast<uint64_t>((static_cast<long double>(SDL_GetPerformanceCounter()) * 1000000000.0L) /
-	                             static_cast<long double>(frequency));
+	return WorkSchedule::now();
 }
 
 void ONScripter::handleSDLEvents() {
@@ -533,6 +527,7 @@ void ONScripter::fetchEventsToQueue() {
 		fetchedEventQueue.emplace_front(event);
 		eventsArrived.store(true, std::memory_order_release);
 		SDL_AtomicUnlock(&fetchedEventQueueLock);
+		mainThreadWork.notify();
 	};
 
 	auto pushFingerEvents = [this, &lastTimeStamp, pushEvent](bool force = false) {
@@ -819,7 +814,8 @@ void ONScripter::printFramePacingTelemetry() const {
 	            "coarse_sleep_calls=%llu spin_polls=%llu fps_display_samples=%llu "
 	            "fps_display_average_frame_ms=%.3f fps_display_max_frame_ms=%.3f "
 	            "last_fps_display_frame_ms=%.3f last_fps_display_value=%.3f "
-	            "min_fps_display_value=%.3f max_fps_display_value=%.3f\n",
+	            "min_fps_display_value=%.3f max_fps_display_value=%.3f "
+	            "idle_waits=%llu idle_ms=%.3f\n",
 	            static_cast<unsigned long long>(framePacingTelemetry.frames),
 	            averageFrameMs,
 	            maxFrameMs,
@@ -839,7 +835,9 @@ void ONScripter::printFramePacingTelemetry() const {
 	            framePacingTelemetry.lastFpsDisplayFrameMs,
 	            framePacingTelemetry.lastFpsDisplayValue,
 	            framePacingTelemetry.minFpsDisplayValue,
-	            framePacingTelemetry.maxFpsDisplayValue);
+	            framePacingTelemetry.maxFpsDisplayValue,
+	            static_cast<unsigned long long>(framePacingTelemetry.idleWaits),
+	            static_cast<double>(framePacingTelemetry.idleNanos) / NANOS_PER_MILLISECOND);
 }
 
 /**
@@ -1017,7 +1015,96 @@ void ONScripter::drawFpsOverlay() {
 	screenChanged = true;
 }
 
-void ONScripter::waitEvent(int count, bool nopPreferred) {
+uint64_t ONScripter::nextUpdateNanos() {
+	WorkSchedule schedule;
+	if (effect_current || save_load_overlay_active || request_video_shutdown ||
+	    video_skip_mode != VideoSkip::NotPlaying || dynamicProperties.hasPending() ||
+	    camera.isMoving() || camera.has_moved || warpAmplitude != 0 ||
+	    onionAlphaFactor != 0 || onionAlphaCooldown != 0 || dlgCtrl.hasRenderingWork() ||
+	    !before_dirty_rect_scene.isEmpty() || !before_dirty_rect_hud.isEmpty() ||
+	    constant_refresh_mode != REFRESH_NONE_MODE || screenChanged ||
+	    (skip_mode & (SKIP_NORMAL | SKIP_TO_WAIT | SKIP_SUPERSKIP)) || keyState.ctrl ||
+	    fps_overlay_refresh_required || joyCtrl.needsPolling())
+		return 0;
+	for (const auto &ss : spritesets)
+		if (ss.second.warpAmplitude != 0)
+			return 0;
+	{
+		Lock lock(&registeredCRActions);
+		for (const auto &action : registeredCRActions)
+			schedule.requireAfter(action->terminated ? 0 : action->nextUpdateNanos());
+	}
+	schedule.requireAfter(nextAnimationUpdateNanos());
+	if (fps_overlay_visible || show_fps_counter)
+		schedule.requireAfter(FPS_DISPLAY_UPDATE_INTERVAL_NS);
+	if (allow_rendering) {
+		if (gpu.hasScheduledJobs())
+			schedule.requireAfter(0);
+		for (const auto &entry : imageAssets.pending)
+			if (!entry.second->claimed && entry.second->ready())
+				schedule.requireAfter(16 * NANOS_PER_MILLISECOND);
+	}
+	if (cursorAutoHide && cursorVisible) {
+		const uint32_t elapsed = static_cast<uint32_t>(SDL_GetTicks()) - lastCursorMove;
+		schedule.requireAfter((elapsed >= 5000 ? 0 : 5000 - elapsed) * NANOS_PER_MILLISECOND);
+	}
+	return schedule.delay(WorkSchedule::Never);
+}
+
+void ONScripter::waitForPendingWork(uint64_t maximumNanos) {
+	const auto observed = mainThreadWork.snapshot();
+	if (eventsArrived.load(std::memory_order_acquire) || !localEventQueue.empty() ||
+	    dlgCtrl.wantsControl() || exitCode.load(std::memory_order_relaxed) != ExitType::None)
+		return;
+	// The next normal update already advances one frame. Sleep only the extra
+	// time, then carry the actual elapsed time into that update exactly once.
+	const uint64_t next = nextUpdateNanos();
+	if (next <= current_frame_nanos)
+		return;
+	const uint64_t start = WorkSchedule::now();
+	const uint64_t deadline = start + std::min(next - current_frame_nanos, maximumNanos);
+	while (WorkSchedule::now() < deadline) {
+#ifndef DROID
+		// Native window messages must still be pumped on the video thread.
+		// Only this cheap input service runs here; scene work stays asleep.
+		SDL_PumpEvents();
+		const uint64_t until = std::min(deadline, WorkSchedule::now() + EVENT_QUEUE_IDLE_WAIT_MS * NANOS_PER_MILLISECOND);
+#else
+		const uint64_t until = deadline;
+#endif
+		if (mainThreadWork.waitUntil(observed, until))
+			break;
+	}
+	const uint64_t elapsed = WorkSchedule::now() - start;
+	idle_game_state_advance_nanos += elapsed;
+	if (framePacingTelemetryEnabled()) {
+		++framePacingTelemetry.idleWaits;
+		framePacingTelemetry.idleNanos += elapsed;
+	}
+}
+
+void ONScripter::waitForAsync(const std::function<bool()> &ready) {
+	// Some completion checks consume a semaphore. Keep the result if the
+	// worker finishes while the event loop is servicing a frame.
+	bool completed = false;
+	const std::function<bool()> completion = [&] { return completed || (completed = ready()); };
+	uint64_t serviceAt = WorkSchedule::now() + 5 * NANOS_PER_MILLISECOND;
+	for (;;) {
+		const auto observed = mainThreadWork.snapshot();
+		if (completion())
+			return;
+		// Keep servicing animation and input during a long load. Short loads
+		// wake this wait directly, with no millisecond polling loop.
+		if (WorkSchedule::now() >= serviceAt) {
+			waitEvent(0, true, completion);
+			serviceAt = WorkSchedule::now() + 5 * NANOS_PER_MILLISECOND;
+		} else {
+			mainThreadWork.waitUntil(observed, serviceAt);
+		}
+	}
+}
+
+void ONScripter::waitEvent(int count, bool nopPreferred, const std::function<bool()> &asyncComplete) {
 	//sendToLog(LogLevel::Info, "----waitEventSub(%i)\n", count);
 	static unsigned int lastExitTime   = 0;
 	unsigned int externalTimeThreshold = 5; // for instance
@@ -1067,6 +1154,12 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 	bool resetFramePacing      = lastFlipTimeNanos == 0 || thisCallTimeNanos - lastFlipTimeNanos > STALE_FRAME_BASELINE_NS;
 
 	do {
+		const uint64_t idleAdvance = idle_game_state_advance_nanos;
+		idle_game_state_advance_nanos = 0;
+		if (idleAdvance) {
+			thisCallTimeNanos = highResolutionTicksNanos();
+			resetFramePacing = true;
+		}
 #if defined(DROID)
 		// Android has the surface, so nothing drawn from here can be seen.
 		//
@@ -1081,9 +1174,10 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 		//
 		// allow_rendering is restored by the resume block further down, which
 		// already forces the repaint the returning surface needs.
+		const auto backgroundWake = mainThreadWork.snapshot();
 		if (droidInBackground.load(std::memory_order_acquire)) {
 			allow_rendering = false;
-			SDL_Delay(DROID_BACKGROUND_IDLE_MS);
+			mainThreadWork.waitUntil(backgroundWake, WorkSchedule::now() + DROID_BACKGROUND_IDLE_MS * NANOS_PER_MILLISECOND);
 		}
 
 		// Android asks for memory back on its own schedule, including as the
@@ -1106,6 +1200,7 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 		}
 		uint64_t framesOvershoot = 0;
 		uint64_t nanosPerFrame   = fps->nanosPerFrame();
+		current_frame_nanos = nanosPerFrame;
 		uint64_t timeThisFrame{nanosPerFrame};
 		uint64_t waitThisFrame{timeThisFrame};
 		const bool collectFramePacingTelemetry = framePacingTelemetryEnabled();
@@ -1128,8 +1223,16 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 			accumulatedOvershootNanos -= timeThisFrame;
 			framesOvershoot++;
 		}
+		// Recover sub-frame sleep overshoot on the next deadline as well. A
+		// blocking timer need not be exact to maintain the requested frame rate.
+		const uint64_t recoveredNanos = std::min(accumulatedOvershootNanos, waitThisFrame);
+		accumulatedOvershootNanos -= recoveredNanos;
+		waitThisFrame -= recoveredNanos;
+		const uint64_t targetThisFrame = timeThisFrame - recoveredNanos;
+		if (collectFramePacingTelemetry)
+			framePacingTelemetry.waitTargetNanos = waitThisFrame;
 
-		advanceGameState(nanosPerFrame * (framesOvershoot + 1)); // may advance multiple frames if we are lagging
+		advanceGameState(nanosPerFrame * (framesOvershoot + 1) + idleAdvance);
 		if (save_load_overlay_active) {
 			stepSaveLoadOverlay();
 		} else if (allow_rendering) {
@@ -1167,20 +1270,29 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 			GPU_FlushBlitBuffer();
 		}
 
-		if (cursorAutoHide && lastCursorMove + 5000 < ticksNow) {
+		if (cursorAutoHide && cursorVisible && ticksNow - lastCursorMove >= 5000) {
 			cursorState(false);
 		}
 
+		// Optional uploads may use a small slice of spare frame time. Once the
+		// slice is spent, or the queues are empty, park until work or the frame
+		// deadline arrives. There is deliberately no busy-spin precision tail.
+		const uint64_t workBudgetEnd = highResolutionTicksNanos() + 2 * NANOS_PER_MILLISECOND;
 		while (true) {
+			const auto observed = mainThreadWork.snapshot();
 			ticksNow = SDL_GetTicks();
+			// An image/sound waiter needs frame service, but must resume as soon
+			// as its worker finishes instead of sleeping out the remaining frame.
+			if (asyncComplete && asyncComplete())
+				break;
 			uint64_t ticksNowNanos = highResolutionTicksNanos();
 			uint64_t frameElapsed  = ticksNowNanos - lastFlipTimeNanos;
 			if (frameElapsed >= waitThisFrame) {
-				if (frameElapsed > timeThisFrame) {
-					accumulatedOvershootNanos += frameElapsed - timeThisFrame;
+				if (frameElapsed > targetThisFrame) {
+					accumulatedOvershootNanos += frameElapsed - targetThisFrame;
 					if (collectFramePacingTelemetry) {
 						++framePacingTelemetry.overshootFrames;
-						framePacingTelemetry.overshootNanos += frameElapsed - timeThisFrame;
+						framePacingTelemetry.overshootNanos += frameElapsed - targetThisFrame;
 					}
 				}
 				break;
@@ -1189,32 +1301,16 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 			if (skip_mode & SKIP_SUPERSKIP)
 				break;
 			// we still have time, do some downtime processing
-			bool processed{mainThreadDowntimeProcessing(false)};
+			bool processed = ticksNowNanos < workBudgetEnd && mainThreadDowntimeProcessing(false);
 			if (collectFramePacingTelemetry) {
 				++framePacingTelemetry.downtimePolls;
 				if (processed)
 					++framePacingTelemetry.downtimeWorkPolls;
 			}
 			if (!processed) {
-				const uint64_t remainingNanos = waitThisFrame - frameElapsed;
-#if defined(ONS_USE_SDL3)
-				if (remainingNanos > PRECISE_SLEEP_MIN_NS + PRECISE_SLEEP_GUARD_NS) {
-					if (collectFramePacingTelemetry)
-						++framePacingTelemetry.preciseSleepCalls;
-					SDL_DelayPrecise(remainingNanos - PRECISE_SLEEP_GUARD_NS);
-					continue;
-				}
-#else
-				if (timeThisFrame >= COARSE_SLEEP_FRAME_MIN_NS &&
-				    remainingNanos >= COARSE_SLEEP_REMAINING_MIN_NS) {
-					if (collectFramePacingTelemetry)
-						++framePacingTelemetry.coarseSleepCalls;
-					SDL_Delay(1);
-					continue;
-				}
-#endif
 				if (collectFramePacingTelemetry)
-					++framePacingTelemetry.spinPolls;
+					++framePacingTelemetry.preciseSleepCalls;
+				mainThreadWork.waitUntil(observed, lastFlipTimeNanos + waitThisFrame);
 			}
 		}
 
@@ -1263,7 +1359,7 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 
 		//sendToLog(LogLevel::Info,"  flipped -- aimed for %i ms, took %i ms\n", constant_refresh_interval, ticksNow - lastFlipTime);
 		const uint64_t frameEndNanos = highResolutionTicksNanos();
-		const uint64_t frameNanos    = frameEndNanos >= lastFlipTimeNanos ? frameEndNanos - lastFlipTimeNanos : 0;
+		const uint64_t frameNanos    = (frameEndNanos >= lastFlipTimeNanos ? frameEndNanos - lastFlipTimeNanos : 0) + idleAdvance;
 		if (collectFramePacingTelemetry && frameEndNanos >= lastFlipTimeNanos) {
 			++framePacingTelemetry.frames;
 			framePacingTelemetry.totalFrameNanos += frameNanos;
@@ -1309,6 +1405,8 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 				frameTailEstimateNanos = (frameTailEstimateNanos * 7 + frameTailNanos) / 8;
 		}
 		lastFlipTimeNanos = frameEndNanos;
+		if (asyncComplete && asyncComplete())
+			break;
 
 		//printClock("(next iteration)");
 
@@ -1323,6 +1421,13 @@ void ONScripter::waitEvent(int count, bool nopPreferred) {
 
 		count -= (ticksNow - ticks);
 		ticks = ticksNow;
+		if (!timerBreakout) {
+			waitForPendingWork(250 * NANOS_PER_MILLISECOND);
+		} else if (count > 0) {
+			const uint64_t remaining = static_cast<uint64_t>(count) * NANOS_PER_MILLISECOND;
+			if (remaining > nanosPerFrame)
+				waitForPendingWork(std::min(remaining - nanosPerFrame, 250 * NANOS_PER_MILLISECOND));
+		}
 		//sendToLog(LogLevel::Info,"  next iteration\n");
 	} while (count > 0 || !timerBreakout); // if we are told not to break out by timer, this is an infinite loop
 	//sendToLog(LogLevel::Info, "-----------------\n");
@@ -2362,6 +2467,8 @@ void ONScripter::translateKeyUpEvent(SDL_Event &event, EventProcessingState &sta
 bool ONScripter::mainThreadDowntimeProcessing(bool essentialProcessingOnly) {
 
 	bool didSomething{false};
+	if (essentialProcessingOnly && allow_rendering)
+		serviceMemoryBudget();
 
 	// Load chunk call
 	// Check loadGPUImageByChunks if you want to use this.
@@ -2371,6 +2478,8 @@ bool ONScripter::mainThreadDowntimeProcessing(bool essentialProcessingOnly) {
 	}*/
 
 	if (allow_rendering && !essentialProcessingOnly) {
+		if (video_skip_mode == VideoSkip::NotPlaying)
+			didSomething |= serviceImageAssets();
 		didSomething |= gpu.handleScheduledJobs();
 	}
 

@@ -14,6 +14,7 @@
 #include "Engine/Components/Dialogue.hpp"
 #include "Engine/Components/DynamicProperty.hpp"
 #include "Engine/Components/GlyphAtlas.hpp"
+#include "Engine/Components/ImageAssets.hpp"
 #include "Engine/Components/TextWindow.hpp"
 #include "Engine/Entities/ConstantRefresh.hpp"
 #include "Engine/Entities/Animation.hpp"
@@ -108,6 +109,7 @@ public:
 	// So that ONSLabel methods can be called from async threads
 	friend class LoadImageCacheInstruction;
 	friend class LoadImageInstruction;
+	friend class PrepareImageInstruction;
 	friend class PlaySoundInstruction;
 	friend class LoadSoundCacheInstruction;
 	// Because I'm lazy and tired ><
@@ -663,6 +665,7 @@ protected:
 	bool endOfEventBatch{false};
 	uint32_t lastCursorMove{0};
 	bool cursorAutoHide{true};
+	bool cursorVisible{true};
 	void cursorState(bool show);
 
 #if defined(MACOSX)
@@ -702,7 +705,10 @@ protected:
 	void flushEventSub(SDL_Event &event);
 	void flushEvent();
 	void handleSDLEvents();
-	void waitEvent(int count, bool nopPreferred = false);
+	void waitEvent(int count, bool nopPreferred = false, const std::function<bool()> &asyncComplete = {});
+	void waitForPendingWork(uint64_t maximumNanos);
+	uint64_t nextUpdateNanos();
+	void waitForAsync(const std::function<bool()> &ready);
 	void trapHandler();
 	void initSDL();
 	void toggleFpsOverlay();
@@ -1648,6 +1654,8 @@ private:
 	int constant_refresh_mode{REFRESH_NONE_MODE};
 	bool screenChanged{false};
 	uint64_t current_game_state_advance_nanos{0};
+	uint64_t idle_game_state_advance_nanos{0};
+	uint64_t current_frame_nanos{1000000000 / DEFAULT_FPS};
 	bool saveNextFrame{false};
 	Clock warpClock;
 	float warpSpeed{0};
@@ -1663,6 +1671,7 @@ private:
 	int proceedCursorAnimation();
 	int estimateNextDuration(AnimationInfo *anim, RenderRect &rect, int minimum, bool old_ai = false);
 	void advanceAIclocks(uint64_t ns);
+	uint64_t nextAnimationUpdateNanos();
 	void advanceAnimationInfoClocks(uint64_t ns, AnimationInfo *ai, int i, int type);
 	void advanceSpecificAIclocks(uint64_t ns, int i, int type, bool old_ai = false);
 
@@ -1696,7 +1705,13 @@ private:
 	void printBigImageCellCacheTelemetry() const;
 	void setupAnimationInfo(AnimationInfo *anim, Fontinfo *info = nullptr);
 	void postSetupAnimationInfo(AnimationInfo *anim);
-	void buildAIImage(AnimationInfo *anim);
+	void buildAIImage(AnimationInfo *anim, size_t maxDecodedBytes = 0, MemoryBudget::Lease *staging = nullptr);
+	std::shared_ptr<ImageAssetJob> requestImageAsset(const AnimationInfo &image, bool speculative);
+	void prepareImageAsset(const std::shared_ptr<ImageAssetJob> &job);
+	void prefetchImageAssets();
+	bool serviceImageAssets();
+	void clearImageAssets();
+	void serviceMemoryBudget();
 	bool treatAsSameImage(const AnimationInfo &anim1, const AnimationInfo &anim2);
 	void parseTaggedString(AnimationInfo *anim, bool is_mask = false);
 	void cleanSpritesetCache(SpritesetInfo *spriteset, bool before);
@@ -1761,6 +1776,7 @@ private:
 	GlyphAtlasController glyphAtlas;
 
 	ImageCacheController imageCache;
+	ImageAssets imageAssets;
 	SoundCacheController soundCache;
 
 	bool shouldExit{false};
@@ -1784,12 +1800,12 @@ public:
 private:
 	/* ---------------------------------------- */
 	/* Image processing */
-	void loadImageIntoCache(int id, const std::string &filename_str, bool allow_rgb = false);
+	void loadImageIntoCache(int id, const std::string &filename_str, bool allow_rgb = false, bool speculative = false);
 	void dropCache(int *id, const std::string &filename_str);
-	SDL_Surface *loadImage(const char *filename, bool *has_alpha = nullptr, bool allow_rgb = false);
+	SDL_Surface *loadImage(const char *filename, bool *has_alpha = nullptr, bool allow_rgb = false, size_t maxDecodedBytes = 0, MemoryBudget::Lease *staging = nullptr);
 	RenderImage *loadGpuImage(const char *file_name, bool allow_rgb = false);
 	SDL_Surface *createRectangleSurface(const char *filename);
-	SDL_Surface *createSurfaceFromFile(const char *filename);
+	SDL_Surface *createSurfaceFromFile(const char *filename, size_t maxDecodedBytes = 0, MemoryBudget::Lease *staging = nullptr);
 
 	void shiftHoveredButtonInDirection(int diff);
 

@@ -1,9 +1,12 @@
 pkgname=libpng
 pkgver=1.6.58
-pkgrel=1
+pkgrel=2
 depends=('zlib')
 sources=("https://downloads.sourceforge.net/libpng/libpng-${pkgver}.tar.xz")
 hashes=('28eb403f51f0f7405249132cecfe82ea5c0ef97f1b32c5a65828814ae0d34775')
+
+# Supplying include flags overrides configure's default optimization flags.
+cflags="-O3"
 
 configopts=(
     '--disable-dependency-tracking'

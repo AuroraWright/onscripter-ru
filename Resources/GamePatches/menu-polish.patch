@@ -1,0 +1,1148 @@
+diff --git a/en.txt b/en.txt
+index 4dd7901..1f78a9f 100644
+--- a/en.txt
++++ b/en.txt
+@@ -569769,7 +569769,7 @@ if %BGM_Id == 13	mov $BGM_Title,"Rose" : return
+ if %BGM_Id == 14	mov $BGM_Title,"At Death’s Door" : return
+ if %BGM_Id == 15	mov $BGM_Title,"Hell’s Halls" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"Beckoning" : return
+ if %BGM_Id == 19	mov $BGM_Title,"Suspicious Scent" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -569777,7 +569777,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"butterfly" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"The Witch of the Painting" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"Scar in the Score" : return
+@@ -569847,10 +569847,10 @@ if %BGM_Id == 91	mov $BGM_Title,"Mystic Forest" : return
+ if %BGM_Id == 92	mov $BGM_Title,"The Tale of Sakutarou’s Tenacity" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"open fire" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -569885,7 +569885,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"light" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"Bread of Life" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"Promise" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"WINGS(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"WINGS (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"Fake Gray Smile" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"Eternal Chains" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -569897,7 +569897,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"Something’s Up & Going Down" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"Waltz Op.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -569911,7 +569911,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"The Way" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"Infant Queen Bee" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"SUSPICIOUSSCENT" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -569923,8 +569923,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"Song without a name ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"Toybox" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"Puppet Show" : return
+@@ -569940,18 +569940,18 @@ if %BGM_Id == 187 	mov $BGM_Title,"Stuffed Animal" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"Bizarre Divertimento" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"Flying" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Cocoon of White Dreams -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"When the Seagulls Cry" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"Tsurupettan" : return
+-if %BGM_Id == 1011	mov $BGM_Title,"system0(Original Version)" : return
++if %BGM_Id == 1011	mov $BGM_Title,"system0 (Original Version)" : return
+ if %legacy_op == off && %BGM_Id == 1012	mov $BGM_Title,"Igreja of Echoing Vows (Video)" : return
+ if %legacy_op == on  && %BGM_Id == 1012	mov $BGM_Title,"When the Seagulls Cry (Video)" : return
+ if %BGM_Id == 1014	mov $BGM_Title,"Inanna’s Dream (Video)" : return
+@@ -569980,7 +569980,7 @@ if %BGM_Id == 13	mov $BGM_Title,"薔薇" : return
+ if %BGM_Id == 14	mov $BGM_Title,"隣死" : return
+ if %BGM_Id == 15	mov $BGM_Title,"煉沙回廊" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"誘い" : return
+ if %BGM_Id == 19	mov $BGM_Title,"胡散の香り" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -569988,7 +569988,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"ageha" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"絵画の魔女" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"痕音" : return
+@@ -570012,7 +570012,7 @@ if %BGM_Id == 45	mov $BGM_Title,"サソリのハラワタ" : return
+ if %BGM_Id == 46	mov $BGM_Title,"終焉 VerC" : return
+ if %BGM_Id == 47	mov $BGM_Title,"Answer" : return
+ if %BGM_Id == 48	mov $BGM_Title,"Answer short" : return
+-if %BGM_Id == 49	mov $BGM_Title,"施律（シラベ）inst.ver" : return
++if %BGM_Id == 49	mov $BGM_Title,"施律 （シラベ）inst.ver" : return
+ if %BGM_Id == 50	mov $BGM_Title,"Red Dread" : return
+ if %BGM_Id == 51	mov $BGM_Title,"moon" : return
+ if %BGM_Id == 52	mov $BGM_Title,"where" : return
+@@ -570021,7 +570021,7 @@ if %BGM_Id == 54	mov $BGM_Title,"Worldend dominator" : return
+ if %BGM_Id == 55	mov $BGM_Title,"黒のリリアナ" : return
+ if %BGM_Id == 56	mov $BGM_Title,"休息" : return
+ if %BGM_Id == 57	mov $BGM_Title,"白日夢の果て" : return
+-if %BGM_Id == 58	mov $BGM_Title,"施律（シラベ）" : return
++if %BGM_Id == 58	mov $BGM_Title,"施律 （シラベ）" : return
+ if %BGM_Id == 59	mov $BGM_Title,"Over the sky" : return
+ if %BGM_Id == 60	mov $BGM_Title,"ひだまり" : return
+ if %BGM_Id == 61	mov $BGM_Title,"ロウソクたちが踊る" : return
+@@ -570058,10 +570058,10 @@ if %BGM_Id == 91	mov $BGM_Title,"神秘の森" : return
+ if %BGM_Id == 92	mov $BGM_Title,"さくたろうの頑張り物語" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"hibuta" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -570096,7 +570096,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"hikari" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"命のパン" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"約束" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"鈍色の空笑" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"永遠の鎖" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -570108,7 +570108,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"キ・ナの香り" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"ワルツOp.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -570122,7 +570122,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"道" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"嬰児クインビー" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"ウサンノカオリ" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -570134,8 +570134,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"なまえのないうた ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"おもちゃ箱" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"人形劇" : return
+@@ -570151,15 +570151,15 @@ if %BGM_Id == 187 	mov $BGM_Title,"ぬいぐるみ" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"怪奇ディヴェルティメント" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"飛翔" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"白夢の繭 -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"うみねこのなく頃に" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"つるぺったん" : return
+ if %BGM_Id == 1011	mov $BGM_Title,"システム零 (Original Version)" : return
+@@ -570187,7 +570187,7 @@ if %BGM_Id == 13	mov $BGM_Title,"Bara" : return
+ if %BGM_Id == 14	mov $BGM_Title,"Rinshi" : return
+ if %BGM_Id == 15	mov $BGM_Title,"Rensa Kairou" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"Izanai" : return
+ if %BGM_Id == 19	mov $BGM_Title,"Usan no Kaori" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -570195,7 +570195,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"ageha" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"Kaiga no Majo" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"Kizuoto" : return
+@@ -570265,10 +570265,10 @@ if %BGM_Id == 91	mov $BGM_Title,"Shinpi no Mori" : return
+ if %BGM_Id == 92	mov $BGM_Title,"Sakutarou no Ganbari Monogatari" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"hibuta" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -570303,7 +570303,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"hikari" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"Inochi no Pan" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"Yakusoku" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"Nibiiro no Kuushou" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"Eien no Kusari" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -570315,7 +570315,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"Ki-Na no Kaori" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"Waltz Op.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -570329,7 +570329,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"Michi" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"Eiji Queen Bee" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"USANNOKAORI" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -570341,8 +570341,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"Namae no nai uta ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"Omochabako" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"Ningyougeki" : return
+@@ -570358,15 +570358,15 @@ if %BGM_Id == 187 	mov $BGM_Title,"Nuigurumi" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"Kaiki Divertimento" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"Hishou" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Byakumu no Mayu -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"Umineko no Naku Koro ni" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"Tsurupettan" : return
+ if %BGM_Id == 1011	mov $BGM_Title,"system0 (Original Version)" : return
+@@ -572661,8 +572661,9 @@ return
+ 	;end
+ 	
+ 	;Game render button
+-	spbtn 382,72
+-	spbtn 383,73
++	getrenderernum %Free1
++	if %Free1 > 1 spbtn 382,72
++	if %Free1 > 1 spbtn 383,73
+ 	;end
+ 	
+ 	;Op/Ed song subtitles button
+@@ -574082,6 +574083,11 @@ return
+ 	if %interface_kb_dual = 0 lsp 270,set_interface_kb_mouse_on,settings_base_off3,748 : vsp 100,0
+ 	notif %interface_kb_dual = 1 lsp 271,set_interface_dualshock,settings_base_off4,748
+ 	if %interface_kb_dual = 1 lsp 271,set_interface_dualshock_on,settings_base_off4,748
++	; Align the input choices with the other values, using their rendered widths.
++	getspsize 271,%Free1,%Free2
++	amsp 271,1710-%Free1,748
++	getspsize 270,%Free2,%Free3
++	amsp 270,1710-%Free1-%Free2-30,748
+ return
+ 	
+ *settings_op_ed_song_subtitles
+@@ -574125,8 +574131,10 @@ return
+ 	if $Free7 == "ANGLE2" mov $Free7,"ANGLE 2"
+ 	if $Free7 == "ANGLE3" mov $Free7,"ANGLE 3"
+ 	lsp 384,":s;#FFFFFF`{p:8:{w:375:}{a:c:}{fit}" + $Free7 + "}",1260,400
+-	lsp 382,":a/2,0,3;graphics\menu_en\config\config_left.png",1210,412
+-	lsp 383,":a/2,0,3;graphics\menu_en\config\config_right.png",1640,412
++	_csp 382,383
++	getrenderernum %Free1
++	if %Free1 > 1 lsp 382,":a/2,0,3;graphics\menu_en\config\config_left.png",1210,412
++	if %Free1 > 1 lsp 383,":a/2,0,3;graphics\menu_en\config\config_right.png",1640,412
+ return
+ 
+ *settings_rumble_strength
+@@ -583832,6 +583840,18 @@ return
+ 	if %r_display = 1 gosub *r_tips_button_new
+ 	if %r_display = 2 gosub *r_grim_button_new
+ 
++	; Select the first visible entry whenever this list is opened.
++	mov %r_display_tips,0
++	mov %r_display_grim,0
++	for %tmp = 1 to 7
++		getspmode %tmp1,tips1_lsp+%tmp-1
++		if %r_display_tips = 0 && %tmp1 = 1 mov %r_display_tips,%tmp
++	next
++	for %tmp = 1 to 14
++		getspmode %tmp1,grim1_lsp+%tmp-1
++		if %r_display_grim = 0 && %tmp1 = 1 mov %r_display_grim,%tmp
++	next
++
+ 	if %r_display = 1 gosub *r_tips_display_new
+ 	if %r_display = 2 gosub *r_grim_display_new
+ 	
+@@ -585553,7 +585573,7 @@ if %BGM_Id == 194 	mov $BGM_Title,"Дирижёр окончательного 
+ if %BGM_Id == 195 	mov $BGM_Title,"Откровение" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Кокон чистых снов -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"Когда плачут чайки" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Предъявите судьбу" : return
+ if %BGM_Id == 1013  mov $BGM_Title,"Предъявите судьбу (вер. chiru)" : return
+ ;Extra
+diff --git a/wh.txt b/wh.txt
+index 4d9f7c0..c68632a 100644
+--- a/wh.txt
++++ b/wh.txt
+@@ -569677,7 +569677,7 @@ if %BGM_Id == 13	mov $BGM_Title,"Rose" : return
+ if %BGM_Id == 14	mov $BGM_Title,"At Death’s Door" : return
+ if %BGM_Id == 15	mov $BGM_Title,"Hell’s Halls" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"Beckoning" : return
+ if %BGM_Id == 19	mov $BGM_Title,"Suspicious Scent" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -569685,7 +569685,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"butterfly" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"The Witch of the Painting" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"Scar in the Score" : return
+@@ -569755,10 +569755,10 @@ if %BGM_Id == 91	mov $BGM_Title,"Mystic Forest" : return
+ if %BGM_Id == 92	mov $BGM_Title,"The Tale of Sakutarou’s Tenacity" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"open fire" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -569793,7 +569793,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"light" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"Bread of Life" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"Promise" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"WINGS(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"WINGS (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"Fake Gray Smile" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"Eternal Chains" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -569805,7 +569805,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"Something’s Up & Going Down" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"Waltz Op.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -569819,7 +569819,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"The Way" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"Infant Queen Bee" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"SUSPICIOUSSCENT" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -569831,8 +569831,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"Song without a name ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"Toybox" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"Puppet Show" : return
+@@ -569848,18 +569848,18 @@ if %BGM_Id == 187 	mov $BGM_Title,"Stuffed Animal" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"Bizarre Divertimento" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"Flying" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Cocoon of White Dreams -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"When the Seagulls Cry" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"Tsurupettan" : return
+-if %BGM_Id == 1011	mov $BGM_Title,"system0(Original Version)" : return
++if %BGM_Id == 1011	mov $BGM_Title,"system0 (Original Version)" : return
+ if %legacy_op == off && %BGM_Id == 1012	mov $BGM_Title,"Igreja of Echoing Vows" : return
+ if %legacy_op == on  && %BGM_Id == 1012	mov $BGM_Title,"When the Seagulls Cry" : return
+ if %BGM_Id == 1014	mov $BGM_Title,"Inanna’s Dream" : return
+@@ -569888,7 +569888,7 @@ if %BGM_Id == 13	mov $BGM_Title,"薔薇" : return
+ if %BGM_Id == 14	mov $BGM_Title,"隣死" : return
+ if %BGM_Id == 15	mov $BGM_Title,"煉沙回廊" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"誘い" : return
+ if %BGM_Id == 19	mov $BGM_Title,"胡散の香り" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -569896,7 +569896,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"ageha" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"絵画の魔女" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"痕音" : return
+@@ -569920,7 +569920,7 @@ if %BGM_Id == 45	mov $BGM_Title,"サソリのハラワタ" : return
+ if %BGM_Id == 46	mov $BGM_Title,"終焉 VerC" : return
+ if %BGM_Id == 47	mov $BGM_Title,"Answer" : return
+ if %BGM_Id == 48	mov $BGM_Title,"Answer short" : return
+-if %BGM_Id == 49	mov $BGM_Title,"施律（シラベ）inst.ver" : return
++if %BGM_Id == 49	mov $BGM_Title,"施律 （シラベ）inst.ver" : return
+ if %BGM_Id == 50	mov $BGM_Title,"Red Dread" : return
+ if %BGM_Id == 51	mov $BGM_Title,"moon" : return
+ if %BGM_Id == 52	mov $BGM_Title,"where" : return
+@@ -569929,7 +569929,7 @@ if %BGM_Id == 54	mov $BGM_Title,"Worldend dominator" : return
+ if %BGM_Id == 55	mov $BGM_Title,"黒のリリアナ" : return
+ if %BGM_Id == 56	mov $BGM_Title,"休息" : return
+ if %BGM_Id == 57	mov $BGM_Title,"白日夢の果て" : return
+-if %BGM_Id == 58	mov $BGM_Title,"施律（シラベ）" : return
++if %BGM_Id == 58	mov $BGM_Title,"施律 （シラベ）" : return
+ if %BGM_Id == 59	mov $BGM_Title,"Over the sky" : return
+ if %BGM_Id == 60	mov $BGM_Title,"ひだまり" : return
+ if %BGM_Id == 61	mov $BGM_Title,"ロウソクたちが踊る" : return
+@@ -569966,10 +569966,10 @@ if %BGM_Id == 91	mov $BGM_Title,"神秘の森" : return
+ if %BGM_Id == 92	mov $BGM_Title,"さくたろうの頑張り物語" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"hibuta" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -570004,7 +570004,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"hikari" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"命のパン" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"約束" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"鈍色の空笑" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"永遠の鎖" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -570016,7 +570016,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"キ・ナの香り" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"ワルツOp.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -570030,7 +570030,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"道" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"嬰児クインビー" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"ウサンノカオリ" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -570042,8 +570042,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"なまえのないうた ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"おもちゃ箱" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"人形劇" : return
+@@ -570059,15 +570059,15 @@ if %BGM_Id == 187 	mov $BGM_Title,"ぬいぐるみ" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"怪奇ディヴェルティメント" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"飛翔" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"白夢の繭 -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"うみねこのなく頃に" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"つるぺったん" : return
+ if %BGM_Id == 1011	mov $BGM_Title,"システム零 (Original Version)" : return
+@@ -570095,7 +570095,7 @@ if %BGM_Id == 13	mov $BGM_Title,"Bara" : return
+ if %BGM_Id == 14	mov $BGM_Title,"Rinshi" : return
+ if %BGM_Id == 15	mov $BGM_Title,"Rensa Kairou" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"Izanai" : return
+ if %BGM_Id == 19	mov $BGM_Title,"Usan no Kaori" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -570103,7 +570103,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"ageha" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"Kaiga no Majo" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"Kizuoto" : return
+@@ -570173,10 +570173,10 @@ if %BGM_Id == 91	mov $BGM_Title,"Shinpi no Mori" : return
+ if %BGM_Id == 92	mov $BGM_Title,"Sakutarou no Ganbari Monogatari" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"hibuta" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -570211,7 +570211,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"hikari" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"Inochi no Pan" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"Yakusoku" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"Nibiiro no Kuushou" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"Eien no Kusari" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -570223,7 +570223,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"Ki-Na no Kaori" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"Waltz Op.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -570237,7 +570237,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"Michi" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"Eiji Queen Bee" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"USANNOKAORI" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -570249,8 +570249,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"Namae no nai uta ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"Omochabako" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"Ningyougeki" : return
+@@ -570266,15 +570266,15 @@ if %BGM_Id == 187 	mov $BGM_Title,"Nuigurumi" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"Kaiki Divertimento" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"Hishou" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Byakumu no Mayu -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"Umineko no Naku Koro ni" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"Tsurupettan" : return
+ if %BGM_Id == 1011	mov $BGM_Title,"system0 (Original Version)" : return
+@@ -572500,8 +572500,9 @@ return
+ 	;end
+ 	
+ 	;Game render button
+-	spbtn 382,72
+-	spbtn 383,73
++	getrenderernum %Free1
++	if %Free1 > 1 spbtn 382,72
++	if %Free1 > 1 spbtn 383,73
+ 	;end
+ 	
+ 	;Op/Ed song subtitles button
+@@ -573916,6 +573917,11 @@ return
+ 	if %interface_kb_dual = 0 lsp 270,set_interface_kb_mouse_on,settings_base_off3,748 : vsp 100,0
+ 	notif %interface_kb_dual = 1 lsp 271,set_interface_dualshock,settings_base_off4,748
+ 	if %interface_kb_dual = 1 lsp 271,set_interface_dualshock_on,settings_base_off4,748
++	; Align the input choices with the other values, using their rendered widths.
++	getspsize 271,%Free1,%Free2
++	amsp 271,1710-%Free1,748
++	getspsize 270,%Free2,%Free3
++	amsp 270,1710-%Free1-%Free2-30,748
+ return
+ 	
+ *settings_op_ed_song_subtitles
+@@ -573952,8 +573958,10 @@ return
+ 	if $Free7 == "ANGLE2" mov $Free7,"ANGLE 2"
+ 	if $Free7 == "ANGLE3" mov $Free7,"ANGLE 3"
+ 	lsp 384,":s;#FFFFFF`{p:8:{w:375:}{a:c:}{fit}" + $Free7 + "}",1260,400
+-	lsp 382,":a/2,0,3;graphics\menu_en\config\config_left.png",1210,412
+-	lsp 383,":a/2,0,3;graphics\menu_en\config\config_right.png",1640,412
++	_csp 382,383
++	getrenderernum %Free1
++	if %Free1 > 1 lsp 382,":a/2,0,3;graphics\menu_en\config\config_left.png",1210,412
++	if %Free1 > 1 lsp 383,":a/2,0,3;graphics\menu_en\config\config_right.png",1640,412
+ return
+ 
+ *settings_rumble_strength
+@@ -583364,6 +583372,18 @@ return
+ 	if %r_display = 1 gosub *r_tips_button_new
+ 	if %r_display = 2 gosub *r_grim_button_new
+ 
++	; Select the first visible entry whenever this list is opened.
++	mov %r_display_tips,0
++	mov %r_display_grim,0
++	for %tmp = 1 to 7
++		getspmode %tmp1,tips1_lsp+%tmp-1
++		if %r_display_tips = 0 && %tmp1 = 1 mov %r_display_tips,%tmp
++	next
++	for %tmp = 1 to 14
++		getspmode %tmp1,grim1_lsp+%tmp-1
++		if %r_display_grim = 0 && %tmp1 = 1 mov %r_display_grim,%tmp
++	next
++
+ 	if %r_display = 1 gosub *r_tips_display_new
+ 	if %r_display = 2 gosub *r_grim_display_new
+ 	
+@@ -584900,7 +584920,7 @@ if %BGM_Id == 13	mov $BGM_Title,"Rose" : return
+ if %BGM_Id == 14	mov $BGM_Title,"At Death’s Door" : return
+ if %BGM_Id == 15	mov $BGM_Title,"Hell’s Halls" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"Beckoning" : return
+ if %BGM_Id == 19	mov $BGM_Title,"Fishy Aroma" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -584908,7 +584928,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"butterfly" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"The Witch of the Painting" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"Scar in the Score" : return
+@@ -584978,10 +584998,10 @@ if %BGM_Id == 91	mov $BGM_Title,"Mystic Forest" : return
+ if %BGM_Id == 92	mov $BGM_Title,"Sakutarou's Adventure" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"open fire" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -585016,7 +585036,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"light" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"Bread of Life" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"Promise" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"WINGS(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"WINGS (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"Fake Gray Smile" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"Eternal Chains" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -585028,7 +585048,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"Something’s Up & Going Down" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"Waltz Op.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -585042,7 +585062,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"The Way" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"Infant Queen Bee" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"FISHYAROMA" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -585054,8 +585074,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"Song without a name ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"Toybox" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"Puppet Show" : return
+@@ -585071,18 +585091,18 @@ if %BGM_Id == 187 	mov $BGM_Title,"Stuffed Animal" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"Bizarre Divertimento" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"Flying" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Cocoon of White Dreams -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"When the Seagulls Cry" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"Tsurupettan" : return
+-if %BGM_Id == 1011	mov $BGM_Title,"system0(Original Version)" : return
++if %BGM_Id == 1011	mov $BGM_Title,"system0 (Original Version)" : return
+ if %legacy_op == off && %BGM_Id == 1012	mov $BGM_Title,"Igreja of Echoing Vows" : return
+ if %legacy_op == on  && %BGM_Id == 1012	mov $BGM_Title,"When the Seagulls Cry" : return
+ if %BGM_Id == 1014	mov $BGM_Title,"Inanna’s Dream" : return
+diff --git a/ru.txt b/ru.txt
+index 12a3b3b..acb88c4 100644
+--- a/ru.txt
++++ b/ru.txt
+@@ -569613,7 +569613,7 @@ if %BGM_Id == 13	mov $BGM_Title,"Rose" : return
+ if %BGM_Id == 14	mov $BGM_Title,"At Death’s Door" : return
+ if %BGM_Id == 15	mov $BGM_Title,"Hell’s Halls" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"Beckoning" : return
+ if %BGM_Id == 19	mov $BGM_Title,"Suspicious Scent" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -569621,7 +569621,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"butterfly" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"The Witch of the Painting" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"Scar in the Score" : return
+@@ -569691,10 +569691,10 @@ if %BGM_Id == 91	mov $BGM_Title,"Mystic Forest" : return
+ if %BGM_Id == 92	mov $BGM_Title,"The Tale of Sakutarou’s Tenacity" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"open fire" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -569729,7 +569729,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"light" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"Bread of Life" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"Promise" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"WINGS(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"WINGS (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"Fake Gray Smile" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"Eternal Chains" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -569741,7 +569741,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"Something’s Up & Going Down" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"Waltz Op.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -569755,7 +569755,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"The Way" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"Infant Queen Bee" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"SUSPICIOUSSCENT" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -569767,8 +569767,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"Song without a name ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"Toybox" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"Puppet Show" : return
+@@ -569784,18 +569784,18 @@ if %BGM_Id == 187 	mov $BGM_Title,"Stuffed Animal" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"Bizarre Divertimento" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"Flying" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Cocoon of White Dreams -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"When the Seagulls Cry" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"Tsurupettan" : return
+-if %BGM_Id == 1011	mov $BGM_Title,"system0(Original Version)" : return
++if %BGM_Id == 1011	mov $BGM_Title,"system0 (Original Version)" : return
+ if %legacy_op == off && %BGM_Id == 1012	mov $BGM_Title,"Igreja of Echoing Vows" : return
+ if %legacy_op == on  && %BGM_Id == 1012	mov $BGM_Title,"When the Seagulls Cry" : return
+ if %BGM_Id == 1014	mov $BGM_Title,"Inanna’s Dream" : return
+@@ -569824,7 +569824,7 @@ if %BGM_Id == 13	mov $BGM_Title,"薔薇" : return
+ if %BGM_Id == 14	mov $BGM_Title,"隣死" : return
+ if %BGM_Id == 15	mov $BGM_Title,"煉沙回廊" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"誘い" : return
+ if %BGM_Id == 19	mov $BGM_Title,"胡散の香り" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -569832,7 +569832,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"ageha" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"絵画の魔女" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"痕音" : return
+@@ -569856,7 +569856,7 @@ if %BGM_Id == 45	mov $BGM_Title,"サソリのハラワタ" : return
+ if %BGM_Id == 46	mov $BGM_Title,"終焉 VerC" : return
+ if %BGM_Id == 47	mov $BGM_Title,"Answer" : return
+ if %BGM_Id == 48	mov $BGM_Title,"Answer short" : return
+-if %BGM_Id == 49	mov $BGM_Title,"施律（シラベ）inst.ver" : return
++if %BGM_Id == 49	mov $BGM_Title,"施律 （シラベ）inst.ver" : return
+ if %BGM_Id == 50	mov $BGM_Title,"Red Dread" : return
+ if %BGM_Id == 51	mov $BGM_Title,"moon" : return
+ if %BGM_Id == 52	mov $BGM_Title,"where" : return
+@@ -569865,7 +569865,7 @@ if %BGM_Id == 54	mov $BGM_Title,"Worldend dominator" : return
+ if %BGM_Id == 55	mov $BGM_Title,"黒のリリアナ" : return
+ if %BGM_Id == 56	mov $BGM_Title,"休息" : return
+ if %BGM_Id == 57	mov $BGM_Title,"白日夢の果て" : return
+-if %BGM_Id == 58	mov $BGM_Title,"施律（シラベ）" : return
++if %BGM_Id == 58	mov $BGM_Title,"施律 （シラベ）" : return
+ if %BGM_Id == 59	mov $BGM_Title,"Over the sky" : return
+ if %BGM_Id == 60	mov $BGM_Title,"ひだまり" : return
+ if %BGM_Id == 61	mov $BGM_Title,"ロウソクたちが踊る" : return
+@@ -569902,10 +569902,10 @@ if %BGM_Id == 91	mov $BGM_Title,"神秘の森" : return
+ if %BGM_Id == 92	mov $BGM_Title,"さくたろうの頑張り物語" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"hibuta" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -569940,7 +569940,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"hikari" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"命のパン" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"約束" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"鈍色の空笑" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"永遠の鎖" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -569952,7 +569952,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"キ・ナの香り" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"ワルツOp.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -569966,7 +569966,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"道" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"嬰児クインビー" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"ウサンノカオリ" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -569978,8 +569978,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"なまえのないうた ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"おもちゃ箱" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"人形劇" : return
+@@ -569995,15 +569995,15 @@ if %BGM_Id == 187 	mov $BGM_Title,"ぬいぐるみ" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"怪奇ディヴェルティメント" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"飛翔" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"白夢の繭 -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"うみねこのなく頃に" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"つるぺったん" : return
+ if %BGM_Id == 1011	mov $BGM_Title,"システム零 (Original Version)" : return
+@@ -570031,7 +570031,7 @@ if %BGM_Id == 13	mov $BGM_Title,"Bara" : return
+ if %BGM_Id == 14	mov $BGM_Title,"Rinshi" : return
+ if %BGM_Id == 15	mov $BGM_Title,"Rensa Kairou" : return
+ if %BGM_Id == 16	mov $BGM_Title,"Fortitude" : return
+-if %BGM_Id == 17	mov $BGM_Title,"witch in gold(cembalo)" : return
++if %BGM_Id == 17	mov $BGM_Title,"witch in gold (cembalo)" : return
+ if %BGM_Id == 18	mov $BGM_Title,"Izanai" : return
+ if %BGM_Id == 19	mov $BGM_Title,"Usan no Kaori" : return
+ if %BGM_Id == 20	mov $BGM_Title,"stupefaction" : return
+@@ -570039,7 +570039,7 @@ if %BGM_Id == 21	mov $BGM_Title,"praise" : return
+ if %BGM_Id == 22	mov $BGM_Title,"Pass" : return
+ if %BGM_Id == 23	mov $BGM_Title,"ageha" : return
+ if %BGM_Id == 24	mov $BGM_Title,"goldenslaughterer" : return
+-if %BGM_Id == 25	mov $BGM_Title,"Worldend(bp)" : return
++if %BGM_Id == 25	mov $BGM_Title,"Worldend (bp)" : return
+ if %BGM_Id == 26	mov $BGM_Title,"Kaiga no Majo" : return
+ if %BGM_Id == 27	mov $BGM_Title,"suspicion" : return
+ if %BGM_Id == 28	mov $BGM_Title,"Kizuoto" : return
+@@ -570109,10 +570109,10 @@ if %BGM_Id == 91	mov $BGM_Title,"Shinpi no Mori" : return
+ if %BGM_Id == 92	mov $BGM_Title,"Sakutarou no Ganbari Monogatari" : return
+ if %BGM_Id == 93	mov $BGM_Title,"Parallel" : return
+ if %BGM_Id == 95	mov $BGM_Title,"599 million ruins" : return
+-if %BGM_Id == 96	mov $BGM_Title,"Happy Maria!(Instrumental)" : return
++if %BGM_Id == 96	mov $BGM_Title,"Happy Maria! (Instrumental)" : return
+ if %BGM_Id == 97	mov $BGM_Title,"Surrounding" : return
+ if %BGM_Id == 98	mov $BGM_Title,"hibuta" : return
+-if %BGM_Id == 99	mov $BGM_Title,"death(from stupefaction)" : return
++if %BGM_Id == 99	mov $BGM_Title,"death (from stupefaction)" : return
+ if %BGM_Id == 100	mov $BGM_Title,"mortal stampede" : return
+ if %BGM_Id == 101	mov $BGM_Title,"Victima propiciatoria" : return
+ if %BGM_Id == 102	mov $BGM_Title,"Revolt" : return
+@@ -570147,7 +570147,7 @@ if %BGM_Id == 130 	mov $BGM_Title,"hikari" : return
+ if %BGM_Id == 131 	mov $BGM_Title,"Inochi no Pan" : return
+ if %BGM_Id == 132 	mov $BGM_Title,"Yakusoku" : return
+ if %BGM_Id == 133 	mov $BGM_Title,"Tomorrow" : return
+-if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA(Ver hope)" : return
++if %BGM_Id == 134 	mov $BGM_Title,"TSUBASA (Ver hope)" : return
+ if %BGM_Id == 135 	mov $BGM_Title,"Nibiiro no Kuushou" : return
+ if %BGM_Id == 136 	mov $BGM_Title,"Eien no Kusari" : return
+ if %BGM_Id == 137 	mov $BGM_Title,"Love Examination" : return
+@@ -570159,7 +570159,7 @@ if %BGM_Id == 142 	mov $BGM_Title,"Ki-Na no Kaori" : return
+ if %BGM_Id == 143 	mov $BGM_Title,"rog-limitation" : return
+ if %BGM_Id == 144 	mov $BGM_Title,"Waltz Op.34" : return
+ if %BGM_Id == 145 	mov $BGM_Title,"ALIVE" : return
+-if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch(inst)" : return
++if %BGM_Id == 146 	mov $BGM_Title,"birth of new witch (inst)" : return
+ if %BGM_Id == 147 	mov $BGM_Title,"ruriair" : return
+ if %BGM_Id == 148 	mov $BGM_Title,"Engage of marionette" : return
+ if %BGM_Id == 149 	mov $BGM_Title,"Life" : return
+@@ -570173,7 +570173,7 @@ if %BGM_Id == 156 	mov $BGM_Title,"Michi" : return
+ if %BGM_Id == 157 	mov $BGM_Title,"liberatedliberator" : return
+ if %BGM_Id == 158 	mov $BGM_Title,"Thanks for all people" : return
+ if %BGM_Id == 159 	mov $BGM_Title,"Eiji Queen Bee" : return
+-if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch(Short Ver)" : return
++if %BGM_Id == 160 	mov $BGM_Title,"birth of new witch (Short Ver)" : return
+ if %BGM_Id == 161 	mov $BGM_Title,"USANNOKAORI" : return
+ if %BGM_Id == 162 	mov $BGM_Title,"le4-octobre" : return
+ if %BGM_Id == 163 	mov $BGM_Title,"l&d-circulation" : return
+@@ -570185,8 +570185,8 @@ if %BGM_Id == 168 	mov $BGM_Title,"bore-ral" : return
+ if %BGM_Id == 169 	mov $BGM_Title,"ballade-continuer" : return
+ if %BGM_Id == 170 	mov $BGM_Title,"Namae no nai uta ver.2007 inst" : return
+ if %BGM_Id == 171 	mov $BGM_Title,"lie-alaia" : return
+-if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne(inst)" : return
+-if %BGM_Id == 173 	mov $BGM_Title,"far(flat)" : return
++if %BGM_Id == 172 	mov $BGM_Title,"Golden Nocturne (inst)" : return
++if %BGM_Id == 173 	mov $BGM_Title,"far (flat)" : return
+ if %BGM_Id == 174 	mov $BGM_Title,"Omochabako" : return
+ if %BGM_Id == 175 	mov $BGM_Title,"terminal entrance" : return
+ if %BGM_Id == 176 	mov $BGM_Title,"Ningyougeki" : return
+@@ -570202,15 +570202,15 @@ if %BGM_Id == 187 	mov $BGM_Title,"Nuigurumi" : return
+ if %BGM_Id == 188 	mov $BGM_Title,"Kaiki Divertimento" : return
+ if %BGM_Id == 190 	mov $BGM_Title,"en-counse" : return
+ if %BGM_Id == 191 	mov $BGM_Title,"lixAxil" : return
+-if %BGM_Id == 192 	mov $BGM_Title,"Revelations(inst)" : return
++if %BGM_Id == 192 	mov $BGM_Title,"Revelations (inst)" : return
+ if %BGM_Id == 193 	mov $BGM_Title,"Hishou" : return
+ if %BGM_Id == 194 	mov $BGM_Title,"lastendconductor" : return
+ if %BGM_Id == 195 	mov $BGM_Title,"Revelations" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Byakumu no Mayu -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"Umineko no Naku Koro ni" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Bring The Fate" : return
+-if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate(Ver chiru)" : return
++if %BGM_Id == 1013  mov $BGM_Title,"Bring The Fate (Ver chiru)" : return
+ ;Extra
+ if %BGM_Id == 94	mov $BGM_Title,"Tsurupettan" : return
+ if %BGM_Id == 1011	mov $BGM_Title,"system0 (Original Version)" : return
+@@ -572436,8 +572436,9 @@ return
+ 	;end
+ 	
+ 	;Game render button
+-	spbtn 382,72
+-	spbtn 383,73
++	getrenderernum %Free1
++	if %Free1 > 1 spbtn 382,72
++	if %Free1 > 1 spbtn 383,73
+ 	;end
+ 	
+ 	;Op/Ed song subtitles button
+@@ -573852,6 +573853,11 @@ return
+ 	if %interface_kb_dual = 0 lsp 270,set_interface_kb_mouse_on,settings_base_off3,748 : vsp 100,0
+ 	notif %interface_kb_dual = 1 lsp 271,set_interface_dualshock,settings_base_off4,748
+ 	if %interface_kb_dual = 1 lsp 271,set_interface_dualshock_on,settings_base_off4,748
++	; Align the input choices with the other values, using their rendered widths.
++	getspsize 271,%Free1,%Free2
++	amsp 271,1710-%Free1,748
++	getspsize 270,%Free2,%Free3
++	amsp 270,1710-%Free1-%Free2-30,748
+ return
+ 	
+ *settings_op_ed_song_subtitles
+@@ -573888,8 +573894,10 @@ return
+ 	if $Free7 == "ANGLE2" mov $Free7,"ANGLE 2"
+ 	if $Free7 == "ANGLE3" mov $Free7,"ANGLE 3"
+ 	lsp 384,":s;#FFFFFF`{p:8:{w:375:}{a:c:}{fit}" + $Free7 + "}",1260,400
+-	lsp 382,":a/2,0,3;graphics\menu_en\config\config_left.png",1210,412
+-	lsp 383,":a/2,0,3;graphics\menu_en\config\config_right.png",1640,412
++	_csp 382,383
++	getrenderernum %Free1
++	if %Free1 > 1 lsp 382,":a/2,0,3;graphics\menu_en\config\config_left.png",1210,412
++	if %Free1 > 1 lsp 383,":a/2,0,3;graphics\menu_en\config\config_right.png",1640,412
+ return
+ 
+ *settings_rumble_strength
+@@ -583300,6 +583308,18 @@ return
+ 	if %r_display = 1 gosub *r_tips_button_new
+ 	if %r_display = 2 gosub *r_grim_button_new
+ 
++	; Select the first visible entry whenever this list is opened.
++	mov %r_display_tips,0
++	mov %r_display_grim,0
++	for %tmp = 1 to 7
++		getspmode %tmp1,tips1_lsp+%tmp-1
++		if %r_display_tips = 0 && %tmp1 = 1 mov %r_display_tips,%tmp
++	next
++	for %tmp = 1 to 14
++		getspmode %tmp1,grim1_lsp+%tmp-1
++		if %r_display_grim = 0 && %tmp1 = 1 mov %r_display_grim,%tmp
++	next
++
+ 	if %r_display = 1 gosub *r_tips_display_new
+ 	if %r_display = 2 gosub *r_grim_display_new
+ 	
+@@ -585014,7 +585034,7 @@ if %BGM_Id == 194 	mov $BGM_Title,"Дирижёр окончательного 
+ if %BGM_Id == 195 	mov $BGM_Title,"Откровение" : return
+ if %BGM_Id == 240 	mov $BGM_Title,"Кокон чистых снов -Ricordando il passato-" : return
+ if %BGM_Id == 241 	mov $BGM_Title,"Когда плачут чайки" : return
+-if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS(^-^)" : return
++if %BGM_Id == 1000	mov $BGM_Title,"SuiSui☆SWEETS (^-^)" : return
+ if %BGM_Id == 1010	mov $BGM_Title,"Предъявите судьбу" : return
+ if %BGM_Id == 1013  mov $BGM_Title,"Предъявите судьбу (вер. chiru)" : return
+ ;Extra

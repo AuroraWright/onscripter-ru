@@ -85,17 +85,22 @@ public:
 	LRUCachedSet<Wrapped_GPU_Image, GPUImageDiff> existent;
 	void init() {}
 	void clear() {
-		auto it = requested.begin();
-		while (it != requested.end()) {
-			GPU_FreeImage(*it);
-			it = requested.erase(it);
-		}
+		requested.clear();
 
 		existent.clear();
 		SDL_AtomicLock(&access);
 		toDo.clear();
 		hasPending.store(false, std::memory_order_release);
 		SDL_AtomicUnlock(&access);
+	}
+	bool evictOne(uint64_t idleMilliseconds = 0) {
+		if (SDL_GetTicks() - lastUsed < idleMilliseconds)
+			return false;
+		if (!requested.empty()) {
+			requested.pop_back();
+			return true;
+		}
+		return existent.evictOne();
 	}
 	void push(RenderRect &&rect) {
 		SDL_AtomicLock(&access);
@@ -104,12 +109,14 @@ public:
 		SDL_AtomicUnlock(&access);
 	}
 	bool generate();
+	bool pending() const { return hasPending.load(std::memory_order_acquire); }
 
 private:
+	uint64_t lastUsed{0};
 	SDL_SpinLock access{0};
 	std::atomic_bool hasPending{false};
 	std::vector<RenderRect> toDo;
-	std::vector<RenderImage *> requested;
+	std::vector<Wrapped_GPU_Image> requested;
 };
 
 const std::array<RenderBlendMode, static_cast<size_t>(BlendModeId::TOTAL)> BLEND_MODES{{//{GPU_FUNC_SRC_ALPHA, GPU_FUNC_ONE_MINUS_SRC_ALPHA, GPU_FUNC_SRC_ALPHA, GPU_FUNC_DST_ALPHA, GPU_EQ_ADD, GPU_EQ_ADD},
@@ -122,13 +129,19 @@ const std::array<RenderBlendMode, static_cast<size_t>(BlendModeId::TOTAL)> BLEND
 
 struct PooledGPUImage;
 class TempGPUImagePool {
-	std::unordered_map<RenderImage *, bool> pool; // boolean = is this RenderImage* "checked-out"?
+	struct Entry {
+		bool inUse{true};
+		MemoryBudget::Lease retention;
+		uint64_t lastUsed{0};
+	};
+	std::unordered_map<RenderImage *, Entry> pool;
 public:
 	SDL_Point size;
 	RenderImage *getImage();         // get a fresh temporary image
 	void giveImage(RenderImage *im); // return a temporary image to the pool for reuse
 	void addImages(int n);         // pre-create some blank temporary images to avoid delays later
 	size_t clearUnused(bool require_empty = false); // returns the bytes handed back to the GPU
+	bool evictOneUnused(uint64_t idleMilliseconds);
 
 	struct Census {
 		size_t images{0};
@@ -139,7 +152,7 @@ public:
 		Census c;
 		for (const auto &entry : pool) {
 			++c.images;
-			if (entry.second)
+			if (entry.second.inUse)
 				++c.checkedOut;
 			c.bytes += static_cast<size_t>(entry.first->w) * entry.first->h * 4;
 		}
@@ -392,6 +405,8 @@ public:
 	//We are in need of a proper image loading that disables SDL_gpu blending...
 	RenderImage *createImage(uint16_t w, uint16_t h, uint8_t channels, bool store = false) {
 		RenderImage *image = globalImagePool.get(w, h, channels, store);
+		if (!image)
+			return nullptr;
 		//GPU_SetBlendMode(image, GPU_BLEND_OVERRIDE);
 		if (image->snap_mode != GPU_SNAP_NONE)
 			GPU_SetSnapMode(image, GPU_SNAP_NONE);
@@ -412,9 +427,12 @@ public:
 		return image;
 	}
 
-	RenderImage *copyImageFromSurface(SDL_Surface *surface) {
-		RenderImage *image = createImage(surface->w, surface->h, onsSurfaceBytesPerPixel(surface) == 4 ? 4 : 3);
-		updateImage(image, nullptr, surface, nullptr);
+	RenderImage *copyImageFromSurface(SDL_Surface *surface, bool premultiply = false, const RenderRect *area = nullptr) {
+		RenderImage *image = createImage(area ? area->w : surface->w, area ? area->h : surface->h,
+		                                 onsSurfaceBytesPerPixel(surface) == 4 ? 4 : 3);
+		if (!image)
+			return nullptr;
+		updateImage(image, nullptr, surface, area, true, premultiply);
 		//GPU_SetBlendMode(image, GPU_BLEND_OVERRIDE);
 		if (image->snap_mode != GPU_SNAP_NONE)
 			GPU_SetSnapMode(image, GPU_SNAP_NONE);
@@ -434,9 +452,20 @@ public:
 	}
 
 	void freeImage(RenderImage *image) {
+		if (!image)
+			return;
+#if defined(ONS_USE_SDL3)
+		// Shared asset pixels already have an owner. Keeping another handle in
+		// the blank-image pool cannot save an allocation on its next write.
+		if (image->storage.use_count() > 1) {
+			GPU_FreeImage(image);
+			return;
+		}
+#endif
 		if (!texture_reuse || !initialised() || image->refcount > 1 || (image->format != GPU_FORMAT_RGB && image->format != GPU_FORMAT_RGBA)) {
 			GPU_FreeImage(image);
 		} else {
+			GPU_DiscardImagePixels(image);
 			GPUImageDiff diff;
 			diff.w      = image->w;
 			diff.h      = image->h;
@@ -461,7 +490,7 @@ public:
 	void clearWholeTarget(RenderTarget *target, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t a = 0);
 	void copyGPUImage(RenderImage *img, RenderRect *src_rect, RenderRect *clip_rect, RenderTarget *target, float x = 0, float y = 0, float ratio_x = 1, float ratio_y = 1, float angle = 0, bool centre_coordinates = false);
 	void copyGPUImage(RenderImage *img, RenderRect *src_rect, RenderRect *clip_rect, GPUBigImage *bigImage, float x = 0, float y = 0);
-	void updateImage(RenderImage *image, const RenderRect *image_rect, SDL_Surface *surface, const RenderRect *surface_rect, bool finish = true);
+	void updateImage(RenderImage *image, const RenderRect *image_rect, SDL_Surface *surface, const RenderRect *surface_rect, bool finish = true, bool premultiply = false);
 	void convertNV12ToRGB(RenderImage *image, RenderImage **imgs, RenderRect &rect, uint8_t *planes[4], int *linesizes, bool masked);
 	void convertYUVToRGB(RenderImage *image, RenderImage **imgs, RenderRect &rect, uint8_t *planes[4], int *linesizes, bool masked);
 	void simulateRead(RenderImage *img);
@@ -553,11 +582,15 @@ public:
 	bool handleScheduledJobs() {
 		return globalImagePool.generate();
 	}
+	bool hasScheduledJobs() const { return globalImagePool.pending(); }
 
 	void clearImagePools(bool require_empty=false) {
 		scriptImagePool.clearUnused(require_empty);
 		canvasImagePool.clearUnused(require_empty);
-		typedImagePools.clear();
+		for (auto &entry : typedImagePools)
+			entry.second.clearUnused(require_empty);
+		if (require_empty)
+			typedImagePools.clear();
 		globalImagePool.clear();
 	}
 
@@ -583,8 +616,8 @@ public:
 
 	// Hand back every pooled image nobody is holding, and report the bytes.
 	//
-	// Unlike clearImagePools this keeps the pool objects themselves, because
-	// live PooledGPUImage handles store a pointer to the pool they came from
+	// Keep the pool objects themselves: live PooledGPUImage handles store a
+	// pointer to the pool they came from
 	// and return their image to it on destruction. It is therefore safe to call
 	// at any point in the frame, which is what the Android trim path needs.
 	size_t releaseUnusedPooledImages() {
@@ -594,6 +627,19 @@ public:
 			freedBytes += entry.second.clearUnused();
 		globalImagePool.clear();
 		return freedBytes;
+	}
+	bool evictUnusedPooledImage(bool pressure) {
+		return evictIdlePooledImage(pressure ? 0 : 1000);
+	}
+	bool evictIdlePooledImage(uint64_t idleMilliseconds) {
+		if (globalImagePool.evictOne(idleMilliseconds))
+			return true;
+		if (scriptImagePool.evictOneUnused(idleMilliseconds) || canvasImagePool.evictOneUnused(idleMilliseconds))
+			return true;
+		for (auto &entry : typedImagePools)
+			if (entry.second.evictOneUnused(idleMilliseconds))
+				return true;
+		return false;
 	}
 
 	RenderImage *getCanvasImage() { return canvasImagePool.getImage(); }

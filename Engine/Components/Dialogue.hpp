@@ -360,6 +360,7 @@ public:
 	class TextRenderingMonitorAction : public TypedConstantRefreshAction<TextRenderingMonitorAction> {
 	public:
 		int lastCompletedSegment{-1};
+		uint64_t nextUpdateNanos() override;
 		bool handlesEvent(Uint32 eventType) const override {
 			return isInputEvent(eventType);
 		}
@@ -404,6 +405,7 @@ public:
 	void endLoanExecution();
 
 	void advanceDialogueRendering(uint64_t ns);
+	bool hasRenderingWork() const;
 	void timeCurrentDialogueSegment();
 	void untimeDialogueSegment(int segment);
 	void untimeAllDialogueSegments();

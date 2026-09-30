@@ -246,6 +246,10 @@ private:
 
 public:
 	/* API methods ^___^ */
+	bool hasPending() const {
+		return !customProperties.empty() || !spriteProperties.empty() ||
+		       !globalProperties.empty() || !spritesetProperties.empty();
+	}
 	// Registers property implementation for later usage and returns its id, could be called multiple times
 	int registerProperty(const std::string &name, DynamicPropertyInterface &&iface) {
 		auto it = registeredPropertiesMap.find(name);

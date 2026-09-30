@@ -351,7 +351,7 @@ int ONScripter::proceedAnimation() {
 		}
 	};
 
-	if (animationProceedCandidatesPrepared && !animationProceedCandidates.empty()) {
+	if (animationProceedCandidatesPrepared) {
 		for (AnimationInfo *anim : animationProceedCandidates)
 			proceed(anim);
 		animationProceedCandidatesPrepared = false;
@@ -501,6 +501,32 @@ void ONScripter::advanceAIclocks(uint64_t ns) {
 #endif
 }
 
+uint64_t ONScripter::nextAnimationUpdateNanos() {
+	WorkSchedule schedule;
+	auto inspect = [&](AnimationInfo &root) {
+		for (AnimationInfo *ai = &root; ai; ai = ai->old_ai) {
+			if (ai->camera.isMoving() || (ai->visible && ai->spriteTransforms.warpAmplitude != 0))
+				schedule.requireAfter(0);
+			if (ai->visible && ai->is_animatable)
+				schedule.requireAfter(isSmoothTextCursorSprite(ai) ? 0 : ai->clock.remainingNanos());
+		}
+	};
+	for (auto &ai : tachi_info)
+		inspect(ai);
+	for (int i = 0; i < MAX_SPRITE_NUM; ++i) {
+		inspect(sprite_info[i]);
+		inspect(sprite2_info[i]);
+	}
+	// Cursor and Lua callbacks retain their existing frame cadence.
+	if (draw_cursor_flag)
+		schedule.requireAfter(0);
+#ifdef USE_LUA
+	if (lua_handler.is_animatable && !script_h.isExternalScript())
+		schedule.requireAfter(0);
+#endif
+	return schedule.delay(WorkSchedule::Never);
+}
+
 void ONScripter::advanceAnimationInfoClocks(uint64_t ns, AnimationInfo *ai, int i, int type) {
 	if (ai->visible && ai->is_animatable) {
 		ai->clock.tickNanos(ns);
@@ -645,8 +671,13 @@ void ONScripter::setupAnimationInfo(AnimationInfo *anim, Fontinfo *info) {
 	auto st = SDL_GetTicks();
 	anim->deleteImage();
 	anim->abs_flag = true;
+	const auto assetKey = imageAssets.enabled() ? ImageAssets::key(*anim) : std::string{};
+	RenderImage *cachedImage = assetKey.empty() ? nullptr : imageAssets.get(assetKey);
+	bool logPreparedAsset = cachedImage != nullptr;
 
-	if (anim->trans_mode == AnimationInfo::TRANS_STRING) {
+	if (cachedImage) {
+		anim->setImage(cachedImage);
+	} else if (anim->trans_mode == AnimationInfo::TRANS_STRING) {
 		Fontinfo f_info = info ? *info : sentence_font;
 
 		while (f_info.styleStack.size() > 1) f_info.styleStack.pop();
@@ -731,18 +762,38 @@ void ONScripter::setupAnimationInfo(AnimationInfo *anim, Fontinfo *info) {
 		anim->calculateImage(anim->pos.w, anim->pos.h);
 		//anim->fill(0, 0, 0, 0);
 	} else {
-		async.loadImage(anim);
-		// Wait in loop (like crEffect) until we are loaded
-		// detect events from during image loading & resizing, but without any image refresh (esp. if trapping)
 		int old_event_mode = event_mode;
 		event_mode         = IDLE_EVENT_MODE;
 		preventExit(true);
-		while (!onsWaitSemaphoreTimeout(async.loadImageQueue.resultsWaiting, 1))
-			waitEvent(0);
+		auto job = assetKey.empty() ? nullptr : requestImageAsset(*anim, false);
+		if (job) {
+			++imageAssets.misses;
+			prefetchImageAssets();
+			waitForAsync([&] { return job->ready(); });
+			// Transfer CPU pixels only. The job never owns a GPU object, even
+			// when a trim cancels it while its worker is publishing completion.
+			anim->setSurface(job->image.image_surface);
+			logPreparedAsset = job->speculative && anim->image_surface;
+			job->image.image_surface = nullptr;
+			imageAssets.pending.erase(assetKey);
+		}
+		if (!anim->image_surface) {
+			// Unsupported/oversized speculative assets and failures retain the
+			// regular demand loader, including its missing-file diagnostics.
+			async.loadImage(anim);
+			waitForAsync([&] { return onsTryWaitSemaphore(async.loadImageQueue.resultsWaiting); });
+		}
 		preventExit(false);
 		event_mode = old_event_mode;
 		buildGPUImage(*anim);
+		imageAssets.put(assetKey, anim->gpu_image);
 		freeRedundantSurfaces(*anim);
+	}
+	if (logPreparedAsset && anim->gpu_image && filelog_flag) {
+		Lock lock(&script_h.log_info[ScriptHandler::FILE_LOG]);
+		script_h.findAndAddLog(script_h.log_info[ScriptHandler::FILE_LOG], anim->file_name, true);
+		if (anim->mask_file_name)
+			script_h.findAndAddLog(script_h.log_info[ScriptHandler::FILE_LOG], anim->mask_file_name, true);
 	}
 	anim->stale_image     = false;
 	anim->exists          = true;
@@ -762,19 +813,27 @@ void ONScripter::postSetupAnimationInfo(AnimationInfo *anim) {
 	}
 }
 
-void ONScripter::buildAIImage(AnimationInfo *anim) {
+void ONScripter::buildAIImage(AnimationInfo *anim, size_t maxDecodedBytes, MemoryBudget::Lease *staging) {
 	bool has_alpha{false};
 	bool allow_24_bpp{anim->trans_mode == AnimationInfo::TRANS_COPY};
 
-	SDL_Surface *surface = loadImage(anim->file_name, &has_alpha, allow_24_bpp);
+	SDL_Surface *surface = loadImage(anim->file_name, &has_alpha, allow_24_bpp, maxDecodedBytes, staging);
 	if (!surface)
 		return;
 
 	bool using_24_bpp = onsSurfaceBitsPerPixel(surface) == 24;
 
 	SDL_Surface *surface_m = nullptr;
-	if (anim->trans_mode == AnimationInfo::TRANS_MASK)
-		surface_m = loadImage(anim->mask_file_name);
+	MemoryBudget::Lease maskStaging;
+	if (anim->trans_mode == AnimationInfo::TRANS_MASK) {
+		surface_m = loadImage(anim->mask_file_name, nullptr, false, maxDecodedBytes, staging ? &maskStaging : nullptr);
+		if (maxDecodedBytes && !surface_m) {
+			// A bounded preload must defer the whole asset if its mask cannot fit.
+			// Publishing the unmasked source would cache different visible pixels.
+			SDL_FreeSurface(surface);
+			return;
+		}
+	}
 
 	if (!using_24_bpp) {
 		surface = anim->setupImageAlpha(surface, surface_m, has_alpha);
@@ -2186,6 +2245,11 @@ void ONScripter::buildGPUImage(AnimationInfo &ai) {
 	if (ai.is_big_image) {
 		ai.big_image = std::make_shared<GPUBigImage>(ai.image_surface);
 	} else {
+#if defined(ONS_USE_SDL3)
+		// The transfer path converts alpha while staging bounded uploads. There
+		// is no CPU image mirror, temporary texture or frame wait per chunk.
+		ai.gpu_image = gpu.copyImageFromSurface(ai.image_surface, true);
+#else
 #if !defined(IOS) && !defined(DROID) // There is some issue with loadGPUImageByChunks on iOS
 		if (!(skip_mode & SKIP_SUPERSKIP))
 			ai.gpu_image = gpu.loadGPUImageByChunks(ai.image_surface);
@@ -2193,8 +2257,9 @@ void ONScripter::buildGPUImage(AnimationInfo &ai) {
 #endif
 			ai.gpu_image = gpu.copyImageFromSurface(ai.image_surface);
 
-		GPU_GetTarget(ai.gpu_image);
 		gpu.multiplyAlpha(ai.gpu_image);
+#endif
+		GPU_GetTarget(ai.gpu_image);
 		GPU_DiscardImagePixels(ai.gpu_image);
 	}
 }

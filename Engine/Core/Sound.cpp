@@ -132,7 +132,7 @@ void ONScripter::loadSoundIntoCache(int id, const std::string &filename_str, boo
 	if (ret == SOUND_NONE) {
 		if (pending_cache_chunk[async])
 			pending_cache_chunk[async] = nullptr;
-		sendToLog(LogLevel::Error, "Failed to cache sound %s in slot %d with async %d\n", filename_str.c_str(), id, async);
+		// Cache warmup is optional. A later playback request loads on demand.
 		return;
 	}
 
@@ -243,6 +243,20 @@ int ONScripter::playSound(const char *filename, int format, bool loop_flag, int 
 	if (cacheRet)
 		return cacheRet;
 
+	const bool cacheOnly = channel == MIX_CACHE_CHANNEL_BLOCK || channel == MIX_CACHE_CHANNEL_ASYNC;
+	MemoryBudget::Lease staging;
+	size_t maxDecodedBytes = 0;
+#if defined(ONS_USE_SDL3)
+	if (cacheOnly) {
+		// Include compressed input and the transient old/new decode buffers.
+		maxDecodedBytes = memoryBudget().prefetchAllowance(16 * MemoryBudget::MiB, 3);
+		if (!maxDecodedBytes)
+			return SOUND_NONE;
+		staging = memoryBudget().reserve(MemoryBudget::Kind::Prefetch, maxDecodedBytes * 3);
+		if (!staging)
+			return SOUND_NONE;
+	}
+#endif
 	size_t length{0};
 	uint8_t *buffer{nullptr};
 	{
@@ -251,6 +265,8 @@ int ONScripter::playSound(const char *filename, int format, bool loop_flag, int 
 		// ! locked using a different lock to image, make sure all readers can access separate files !
 		// at this moment only DirectReader is reliable
 		// -------------------------------------------------------------------------------------------
+		if (maxDecodedBytes && (!script_h.reader->getFile(filename, length) || length > maxDecodedBytes))
+			return SOUND_NONE;
 		if (!script_h.reader->getFile(filename, length, &buffer))
 			return SOUND_NONE;
 	}
@@ -461,8 +477,16 @@ int ONScripter::playSound(const char *filename, int format, bool loop_flag, int 
 	}
 
 	if (format & SOUND_CHUNK) {
+#if defined(ONS_USE_SDL3)
+		Mix_Chunk *chunk = Mix_LoadWAV_RW(SDL_RWFromMem(buffer, static_cast<int>(length)), 1, maxDecodedBytes);
+#else
 		Mix_Chunk *chunk = Mix_LoadWAV_RW(SDL_RWFromMem(buffer, static_cast<int>(length)), 1);
+#endif
 		if (!chunk) {
+			if (cacheOnly) {
+				freearr(&buffer);
+				return SOUND_NONE;
+			}
 			char errBuf[MAX_ERRBUF_LEN];
 			std::snprintf(errBuf, MAX_ERRBUF_LEN, "error playing sound '%s': %s\n", filename, Mix_GetError());
 			freearr(&buffer);
@@ -474,6 +498,11 @@ int ONScripter::playSound(const char *filename, int format, bool loop_flag, int 
 			assert(!pending_cache_chunk[async]);
 			pending_cache_chunk[async] = std::make_shared<Wrapped_Mix_Chunk>(chunk);
 			freearr(&buffer);
+			if (staging) {
+				staging.shrinkTo(pending_cache_chunk[async]->memoryBytes());
+				staging.reclassify(MemoryBudget::Kind::Sounds);
+				pending_cache_chunk[async]->retention = std::move(staging);
+			}
 			return SOUND_CHUNK; //doesn't matter what to return
 		} else {
 			if ((format & SOUND_KEEP_CURRENT_MUSIC) && channel == MIX_BGM_CHANNEL)

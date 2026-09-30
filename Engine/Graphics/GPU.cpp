@@ -635,10 +635,16 @@ void GPUController::copyGPUImage(RenderImage *img, RenderRect *src_rect, RenderR
 	}
 }
 
-void GPUController::updateImage(RenderImage *image, const RenderRect *image_rect, SDL_Surface *surface, const RenderRect *surface_rect, bool finish) {
+void GPUController::updateImage(RenderImage *image, const RenderRect *image_rect, SDL_Surface *surface, const RenderRect *surface_rect, bool finish, bool premultiply) {
 	if (finish)
 		(this->*current_renderer->syncRendererState)();
+#if defined(ONS_USE_SDL3)
+	GPU_UpdateImage(image, image_rect, surface, surface_rect, premultiply);
+#else
 	GPU_UpdateImage(image, image_rect, surface, surface_rect);
+	if (premultiply)
+		multiplyAlpha(image, image_rect);
+#endif
 }
 
 void GPUController::convertNV12ToRGB(RenderImage *image, RenderImage **imgs, RenderRect &rect, uint8_t *planes[4], int *linesizes, bool masked) {
@@ -803,8 +809,10 @@ RenderImage *GPUController::loadGPUImageByChunks(SDL_Surface *s, RenderRect *r) 
 	ons.preventExit(true);
 	while (!loader.isLoaded) {
 		loader.loadChunk(finish); // this is the wrong place for this, right? it doesn't work with the new cr model we want
-		ons.event_mode = ONScripter::IDLE_EVENT_MODE;
-		ons.waitEvent(0, true);
+		if (!loader.isLoaded) {
+			ons.event_mode = ONScripter::IDLE_EVENT_MODE;
+			ons.waitEvent(0, true);
+		}
 		finish = false;
 	}
 	ons.preventExit(false);
@@ -1510,7 +1518,7 @@ PooledGPUImage GPUController::getPooledImage(int w, int h) {
 
 RenderImage *TempGPUImagePool::getImage() {
 	// Look for unused temp image
-	auto i = std::find_if(pool.begin(), pool.end(), [](const std::unordered_map<RenderImage *, bool>::value_type &e) { return !e.second; });
+	auto i = std::find_if(pool.begin(), pool.end(), [](const auto &e) { return !e.second.inUse; });
 	// If we found one, return that, otherwise make a new one
 	RenderImage *r;
 	if (i != pool.end()) {
@@ -1521,20 +1529,49 @@ RenderImage *TempGPUImagePool::getImage() {
 		GPU_GetTarget(r);
 		gpu.clearWholeTarget(r->target);
 	}
-	pool[r] = true;
+	auto &entry = pool[r];
+	entry.inUse = true;
+	// Keep the charge while checked out so speculative caches cannot occupy
+	// the space this buffer needs when it returns at the end of the frame.
+	if (!entry.retention)
+		entry.retention = memoryBudget().reserve(MemoryBudget::Kind::Pools, static_cast<size_t>(r->w) * r->h * 4);
 	return r;
 }
 
 void TempGPUImagePool::giveImage(RenderImage *im) {
-	pool[im] = false;
-	gpu.clearWholeTarget(im->target);
+	if (!im)
+		return;
+	auto &entry = pool[im];
+	if (!entry.inUse)
+		return;
+	GPU_DiscardImagePixels(im);
+	const auto budget = memoryBudget().snapshot();
+	// A pressure notification may have lowered the limit while this image
+	// was in use. Re-admit it under that limit before retaining it again.
+	if (budget.used > budget.limit)
+		entry.retention.reset();
+	if (!entry.retention)
+		entry.retention = memoryBudget().reserve(MemoryBudget::Kind::Pools, static_cast<size_t>(im->w) * im->h * 4);
+	if (!entry.retention) {
+		GPU_FreeImage(im);
+		pool.erase(im);
+		return;
+	}
+	entry.inUse = false;
+	entry.lastUsed = SDL_GetTicks();
 }
 
 void TempGPUImagePool::addImages(int n) {
 	RenderImage *im;
 	for (int i = 0; i < n; i++) {
+		auto retention = memoryBudget().reserve(MemoryBudget::Kind::Prefetch, static_cast<size_t>(size.x) * size.y * 4);
+		if (!retention)
+			break;
 		im       = gpu.createImage(size.x, size.y, 4);
-		pool[im] = false;
+		if (!im)
+			break;
+		retention.reclassify(MemoryBudget::Kind::Pools);
+		pool[im] = {false, std::move(retention), SDL_GetTicks()};
 		GPU_GetTarget(im);
 		gpu.clearWholeTarget(im->target);
 	}
@@ -1566,14 +1603,28 @@ void GPUController::logPooledImageCensus() {
 	          static_cast<unsigned long long>(typedImagePools.size()));
 }
 
+bool TempGPUImagePool::evictOneUnused(uint64_t idleMilliseconds) {
+	const uint64_t now = SDL_GetTicks();
+	auto oldest = pool.end();
+	for (auto it = pool.begin(); it != pool.end(); ++it)
+		if (!it->second.inUse && now - it->second.lastUsed >= idleMilliseconds &&
+		    (oldest == pool.end() || it->second.lastUsed < oldest->second.lastUsed))
+			oldest = it;
+	if (oldest == pool.end())
+		return false;
+	GPU_FreeImage(oldest->first);
+	pool.erase(oldest);
+	return true;
+}
+
 size_t TempGPUImagePool::clearUnused(bool require_empty) {
 	size_t freedBytes = 0;
 	auto entry        = pool.begin();
 	while (entry != pool.end()) {
-		if (!entry->second) {
+		if (!entry->second.inUse) {
 			RenderImage *image = entry->first;
 			freedBytes += static_cast<size_t>(image->w) * image->h * 4;
-			gpu.freeImage(image);
+			GPU_FreeImage(image);
 			entry = pool.erase(entry);
 		} else {
 			++entry;
@@ -1588,6 +1639,7 @@ size_t TempGPUImagePool::clearUnused(bool require_empty) {
 }
 
 RenderImage *CombinedImagePool::get(int w, int h, int channels, bool store) {
+	lastUsed = SDL_GetTicks();
 	RenderFormat format;
 
 	switch (channels) {
@@ -1621,10 +1673,12 @@ RenderImage *CombinedImagePool::get(int w, int h, int channels, bool store) {
 
 	auto itI = requested.begin();
 	while (itI != requested.end()) {
-		if ((*itI)->w == w && (*itI)->h == h && (*itI)->format == format) {
-			RenderImage *ret = *itI;
-			if (!store)
+		if (itI->img->w == w && itI->img->h == h && itI->img->format == format) {
+			RenderImage *ret = itI->img;
+			if (!store) {
+				itI->img = nullptr;
 				requested.erase(itI);
+			}
 			return ret;
 		}
 		++itI;
@@ -1641,7 +1695,8 @@ RenderImage *CombinedImagePool::get(int w, int h, int channels, bool store) {
 		res->img       = nullptr;
 		existent.remove(diff);
 		if (store) {
-			requested.push_back(img);
+			requested.emplace_back(img);
+			requested.back().retention = std::move(res->retention);
 		} else {
 			GPU_GetTarget(img);
 			gpu.clearWholeTarget(img->target);
@@ -1649,9 +1704,18 @@ RenderImage *CombinedImagePool::get(int w, int h, int channels, bool store) {
 		return img;
 	}
 
+	MemoryBudget::Lease retention;
+	if (store) {
+		retention = memoryBudget().reserve(MemoryBudget::Kind::Prefetch, static_cast<size_t>(w) * h * 4);
+		if (!retention)
+			return nullptr;
+	}
 	RenderImage *img = GPU_CreateImage(w, h, format);
-	if (store)
-		requested.push_back(img);
+	if (store && img) {
+		retention.reclassify(MemoryBudget::Kind::Pools);
+		requested.emplace_back(img);
+		requested.back().retention = std::move(retention);
+	}
 
 	return img;
 }
@@ -1685,6 +1749,9 @@ void GPUBigImage::create(SDL_Surface *surface) {
 
 		RenderImage *chunk{nullptr};
 		if (surface) {
+#if defined(ONS_USE_SDL3)
+			chunk = gpu.copyImageFromSurface(surface, true, &tmp);
+#else
 #if !defined(IOS) && !defined(DROID) // There is some issue with loadGPUImageByChunks on iOS
 			if (!(ons.skip_mode & ONScripter::SKIP_SUPERSKIP)) {
 				chunk = gpu.loadGPUImageByChunks(surface, &tmp);
@@ -1696,6 +1763,8 @@ void GPUBigImage::create(SDL_Surface *surface) {
 				gpu.updateImage(chunk, nullptr, surface, &tmp);
 			}
 			gpu.multiplyAlpha(chunk);
+#endif
+			GPU_GetTarget(chunk);
 			GPU_SetImageFilter(chunk, GPU_FILTER_LINEAR);
 			GPU_DiscardImagePixels(chunk);
 		} else {

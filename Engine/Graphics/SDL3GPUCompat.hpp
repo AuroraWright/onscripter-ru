@@ -16,6 +16,7 @@
 #include <SDL3/SDL_gpu.h>
 
 #include <vector>
+#include <memory>
 
 #ifndef GPU_FALSE
 #define GPU_FALSE false
@@ -184,6 +185,8 @@ typedef struct GPU_Context {
 	void *data;
 } GPU_Context;
 
+struct GPU_TextureStorage;
+
 typedef struct GPU_Image {
 	GPU_Renderer *renderer;
 	GPU_Target *context_target;
@@ -211,6 +214,7 @@ typedef struct GPU_Image {
 	int refcount;
 	GPU_bool is_alias;
 	SDL_GPUTexture *texture;
+	std::shared_ptr<GPU_TextureStorage> storage;
 	std::vector<Uint8> pixels;
 	int pitch;
 	GPU_bool pixels_dirty;
@@ -281,7 +285,7 @@ void SDLCALL GPU_UnsetClip(GPU_Target *target);
 GPU_Image *SDLCALL GPU_CreateImage(Uint16 w, Uint16 h, GPU_FormatEnum format);
 GPU_Image *SDLCALL GPU_CopyImage(GPU_Image *image);
 void SDLCALL GPU_FreeImage(GPU_Image *image);
-void SDLCALL GPU_UpdateImage(GPU_Image *image, const GPU_Rect *image_rect, SDL_Surface *surface, const GPU_Rect *surface_rect);
+void SDLCALL GPU_UpdateImage(GPU_Image *image, const GPU_Rect *image_rect, SDL_Surface *surface, const GPU_Rect *surface_rect, GPU_bool premultiply = false);
 void SDLCALL GPU_UpdateImageBytes(GPU_Image *image, const GPU_Rect *image_rect, const unsigned char *bytes, int bytes_per_row);
 GPU_bool SDLCALL GPU_SaveImage(GPU_Image *image, const char *filename, GPU_FileFormatEnum format);
 GPU_bool SDLCALL GPU_SaveImage_RW(GPU_Image *image, SDL_RWops *rwops, GPU_bool free_rwops, GPU_FileFormatEnum format);
@@ -335,6 +339,8 @@ bool GPU_TakeSurfaceGeometryStale();
 // the definitions never were, and the performance counter reports them on every
 // platform.
 void GPU_GetLiveImageMemory(size_t &images, size_t &textureBytes, size_t &pixelBytes);
+Uint8 GPU_GetPixelAlpha(GPU_Image *image, int x, int y);
+void GPU_TrimIdleResources(uint64_t idleMilliseconds);
 void GPU_LogLargestLiveImages(size_t count);
 void SDLCALL GPU_RectangleFilled2(GPU_Target *target, GPU_Rect rect, SDL_Color color);
 Uint32 SDLCALL GPU_CompileShader_RW(GPU_ShaderEnum shader_type, SDL_RWops *shader_source, GPU_bool free_rwops);

@@ -86,6 +86,16 @@ public:
 };
 
 class AnimationInfo;
+struct ImageAssetJob;
+class PrepareImageInstruction : public AsyncInstruction {
+public:
+	std::shared_ptr<ImageAssetJob> job;
+	PrepareImageInstruction(AsyncController *controller, std::shared_ptr<ImageAssetJob> job)
+	    : AsyncInstruction(controller), job(std::move(job)) {}
+	AsyncInstructionQueue *getInstructionQueue() override;
+	void execute() override;
+};
+
 class LoadImageInstruction : public AsyncInstruction {
 public:
 	AsyncInstructionQueue *getInstructionQueue() override;
@@ -183,6 +193,7 @@ private:
 int imageCacheThreadLoop(void *arg);
 int soundCacheThreadLoop(void *arg);
 int loadImageThreadLoop(void *arg);
+int imageAssetThreadLoop(void *arg);
 int loadPacketArraysThreadLoop(void *arg);
 int loadVideoFramesThreadLoop(void *arg);
 int loadAudioFramesThreadLoop(void *arg);
@@ -197,7 +208,7 @@ protected:
 
 public:
 	AsyncInstructionQueue imageCacheQueue, soundCacheQueue,
-	    loadImageQueue, loadPacketArraysQueue, loadFramesQueue[3],
+	    loadImageQueue, imageAssetQueue, loadPacketArraysQueue, loadFramesQueue[3],
 	    playSoundQueue, eventQueueQueue;
 	std::vector<AsyncInstructionQueue *> queueCollection;
 	VirtualMutexes mutexes; //-V730_NOINIT
@@ -210,6 +221,7 @@ public:
 	void cacheImage(int id, const std::string &filename, bool allow_rgb);
 	void cacheSound(int id, const std::string &filename);
 	void loadImage(AnimationInfo *ai);
+	void prepareImage(std::shared_ptr<ImageAssetJob> job, bool priority);
 	void loadPacketArrays();
 	void loadVideoFrames();
 	void loadAudioFrames();
@@ -217,7 +229,7 @@ public:
 	void playSound(const char *filename, int format, bool loop_flag, int channel);
 	void startEventQueue();
 
-	void queue(std::unique_ptr<AsyncInstruction> inst);
+	void queue(std::unique_ptr<AsyncInstruction> inst, bool priority = false);
 
 	AsyncController();
 };

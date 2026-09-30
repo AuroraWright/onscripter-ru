@@ -389,6 +389,9 @@ private:
 
 public:
 	bool loadVideo(const char *filename, unsigned audioStream, unsigned subtitleStream);
+	size_t releaseUnusedImages() { return imagePool ? imagePool->clearUnused() : 0; }
+	bool evictUnusedImage(bool pressure) { return imagePool && imagePool->evictOneUnused(pressure ? 0 : 1000); }
+	bool evictIdleImage(uint64_t idleMilliseconds) { return imagePool && imagePool->evictOneUnused(idleMilliseconds); }
 	bool loadPresentation(const RenderRect &rect, bool loop);
 	void frameSize(const SDL_Rect &rect, int &width, float &wFactor, int &height, float &hFactor, bool alpha);
 	bool addSubtitles(const char *filename, int frameWidth, int frameHeight);

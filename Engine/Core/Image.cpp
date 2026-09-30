@@ -23,25 +23,44 @@
 #include <cstdio>
 #include <cstring>
 
-void ONScripter::loadImageIntoCache(int id, const std::string &filename_str, bool allow_rgb) {
-	bool has_alpha;
-	SDL_Surface *surface = loadImage(filename_str.c_str(), &has_alpha, allow_rgb);
+void ONScripter::loadImageIntoCache(int id, const std::string &filename_str, bool allow_rgb, bool speculative) {
+	size_t maxDecodedBytes = 0;
+	MemoryBudget::Lease staging;
+	{
+		Lock lock(&imageCache);
+		if (auto existing = imageCache.get(filename_str)) {
+			imageCache.add(id, filename_str, existing);
+			return;
+		}
+		if (speculative) {
+			maxDecodedBytes = memoryBudget().prefetchAllowance(
+			    std::min(imageCache.availablePrefetchBytes(id), ImageAssets::MaxDecodedBytes), 4);
+			if (!maxDecodedBytes)
+				return;
+		}
+	}
+	bool has_alpha{false};
+	SDL_Surface *surface = loadImage(filename_str.c_str(), &has_alpha, allow_rgb, maxDecodedBytes, speculative ? &staging : nullptr);
 	{
 		Lock lock(&imageCache);
 		auto ptr = imageCache.get(filename_str);
 		if (ptr) {
-			//sendToLog(LogLevel::Error, "Tried to double-add a surface refs %d (ptr: %p, this: %p)\n", surface->refcount, ptr->surface, surface);
-			if (ptr->surface != surface) {
-				sendToLog(LogLevel::Error, "INSANE: different surfaces in loadImageIntoCache\n");
-			}
+			imageCache.add(id, filename_str, ptr);
 			SDL_FreeSurface(surface);
 			return;
 		}
-		imageCache.add(id, filename_str, std::make_shared<Wrapped_SDL_Surface>(surface, has_alpha));
+		auto wrapped = std::make_shared<Wrapped_SDL_Surface>(surface, has_alpha);
+		if (staging) {
+			staging.shrinkTo(wrapped->memoryBytes());
+			staging.reclassify(MemoryBudget::Kind::Images);
+			wrapped->retention = std::move(staging);
+		}
+		imageCache.add(id, filename_str, wrapped);
 	}
 }
 
 void ONScripter::dropCache(int *id, const std::string &filename_str) {
+	imageAssets.remove(filename_str);
 	// Pass nullptr to drop string from all caches
 	{
 		Lock lock(&imageCache);
@@ -68,7 +87,7 @@ RenderImage *ONScripter::loadGpuImage(const char *file_name, bool allow_rgb) {
 		return nullptr;
 	}
 
-	RenderImage *img = gpu.copyImageFromSurface(input_surface);
+	RenderImage *img = gpu.copyImageFromSurface(input_surface, true);
 
 	if (!img) {
 		sendToLog(LogLevel::Error, "loadGpuImage: File %s cannot be opened!\n", file_name);
@@ -76,15 +95,13 @@ RenderImage *ONScripter::loadGpuImage(const char *file_name, bool allow_rgb) {
 		return nullptr;
 	}
 
-	gpu.multiplyAlpha(img);
 	GPU_DiscardImagePixels(img);
 	SDL_FreeSurface(input_surface);
 
 	return img;
 }
 
-SDL_Surface *ONScripter::loadImage(const char *filename, bool *has_alpha, bool allow_rgb) {
-	// This function assumes we never load the same image with a different AnimationInfo::trans_mode
+SDL_Surface *ONScripter::loadImage(const char *filename, bool *has_alpha, bool allow_rgb, size_t maxDecodedBytes, MemoryBudget::Lease *staging) {
 
 	//sendToLog(LogLevel::Info, "loadImage (%s)\n", filename);
 
@@ -95,6 +112,18 @@ SDL_Surface *ONScripter::loadImage(const char *filename, bool *has_alpha, bool a
 		Lock lock(&imageCache);
 		std::shared_ptr<Wrapped_SDL_Surface> r = imageCache.get(filename);
 		if (r && r->surface) {
+			if (maxDecodedBytes && static_cast<uint64_t>(r->surface->w) * r->surface->h > maxDecodedBytes / 4)
+				return nullptr;
+			if (staging) {
+				*staging = memoryBudget().reserve(MemoryBudget::Kind::Prefetch,
+				    static_cast<size_t>(r->surface->w) * r->surface->h * 4 * 3);
+				if (!*staging)
+					return nullptr;
+			}
+			if (filelog_flag && !maxDecodedBytes) {
+				Lock logLock(&script_h.log_info[ScriptHandler::FILE_LOG]);
+				script_h.findAndAddLog(script_h.log_info[ScriptHandler::FILE_LOG], filename, true);
+			}
 			if (has_alpha)
 				*has_alpha = r->has_alpha;
 			if (!allow_rgb && onsSurfaceBitsPerPixel(r->surface) == 24) {
@@ -102,17 +131,20 @@ SDL_Surface *ONScripter::loadImage(const char *filename, bool *has_alpha, bool a
 				// Allow the 24-bit r->surface to be freed by the wrapped surface destruction
 				return ret;
 			}
-			r->surface->refcount++;
-			return r->surface;
+			// Alpha/mask preparation writes pixels. Each consumer needs its own
+			// surface so different tags and concurrent jobs cannot corrupt cache data.
+			return onsConvertSurfaceFormat(r->surface, onsSurfacePixelFormatEnum(r->surface), SDL_SWSURFACE);
 		}
 	}
 
 	SDL_Surface *tmp = nullptr;
 
+	if (filename[0] == '>' && maxDecodedBytes)
+		return nullptr; // Generated images are cheap to create on demand.
 	if (filename[0] == '>')
 		tmp = createRectangleSurface(filename);
 	else if (filename[0] != '*') // layers begin with *
-		tmp = createSurfaceFromFile(filename);
+		tmp = createSurfaceFromFile(filename, maxDecodedBytes, staging);
 	if (tmp == nullptr) {
 		//sendToLog(LogLevel::Info, "returning from loadImage [2]\n");
 		return nullptr;
@@ -147,6 +179,8 @@ SDL_Surface *ONScripter::loadImage(const char *filename, bool *has_alpha, bool a
 		ret = onsConvertSurfaceFormat(tmp, pixel_format_enum_32bpp, SDL_SWSURFACE);
 		SDL_FreeSurface(tmp);
 	}
+	if (!ret)
+		return nullptr;
 
 	//  A PNG image may contain an alpha channel, which complicates
 	// handling loaded images when the ":a" alphablend tag is used,
@@ -273,19 +307,32 @@ SDL_Surface *ONScripter::createRectangleSurface(const char *filename) {
 	return tmp;
 }
 
-SDL_Surface *ONScripter::createSurfaceFromFile(const char *filename) {
+SDL_Surface *ONScripter::createSurfaceFromFile(const char *filename, size_t maxDecodedBytes, MemoryBudget::Lease *staging) {
 
 	static int surfaceCreationLockVar = 0;
 
 	size_t length{0};
 	uint8_t *buffer{nullptr};
+	MemoryBudget::Lease compressed;
 
 	if (filename[0]) {
 		Lock lock(&surfaceCreationLockVar);
+		if (maxDecodedBytes) {
+			script_h.reader->getFile(filename, length, nullptr);
+			if (length > maxDecodedBytes)
+				return nullptr;
+			if (staging) {
+				compressed = memoryBudget().reserve(MemoryBudget::Kind::Prefetch, length + 1);
+				if (!compressed)
+					return nullptr;
+			}
+		}
 		script_h.reader->getFile(filename, length, &buffer);
 	}
 
 	if (length == 0) {
+		if (maxDecodedBytes)
+			return nullptr;
 		//don't complain about missing cursors
 		if (!equalstr(filename, "uoncur.bmp") &&
 		    !equalstr(filename, "uoffcur.bmp") &&
@@ -300,8 +347,37 @@ SDL_Surface *ONScripter::createSurfaceFromFile(const char *filename) {
 		return nullptr;
 	}
 
-	if (filelog_flag)
+	// Speculation is deliberately limited to PNGs with a bounded decoded size.
+	// Check before calling a decoder, not after it has allocated a huge surface.
+	if (maxDecodedBytes) {
+		constexpr uint8_t signature[]{137, 80, 78, 71, 13, 10, 26, 10};
+		auto read32 = [&](size_t offset) {
+			return (uint32_t(buffer[offset]) << 24) | (uint32_t(buffer[offset + 1]) << 16) |
+			       (uint32_t(buffer[offset + 2]) << 8) | buffer[offset + 3];
+		};
+		if (length < 24 || std::memcmp(buffer, signature, sizeof(signature)) != 0 ||
+		    std::memcmp(buffer + 12, "IHDR", 4) != 0 ||
+		    uint64_t(read32(16)) * read32(20) > maxDecodedBytes / 4) {
+			freearr(&buffer);
+			return nullptr;
+		}
+		if (staging) {
+			// Charge the header's actual dimensions before decoding, including
+			// room for format/alpha conversion. Reserving the whole allowance for
+			// each small icon would evict the cache while the worker was busy.
+			*staging = memoryBudget().reserve(MemoryBudget::Kind::Prefetch,
+			    static_cast<size_t>(read32(16)) * read32(20) * 4 * 3);
+			if (!*staging) {
+				freearr(&buffer);
+				return nullptr;
+			}
+		}
+	}
+
+	if (filelog_flag && !maxDecodedBytes) {
+		Lock lock(&script_h.log_info[ScriptHandler::FILE_LOG]);
 		script_h.findAndAddLog(script_h.log_info[ScriptHandler::FILE_LOG], filename, true);
+	}
 
 	const char *ext  = std::strrchr(filename, '.');
 	SDL_RWops *src   = SDL_RWFromMem(buffer, static_cast<int>(length));

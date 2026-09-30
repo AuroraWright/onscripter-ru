@@ -9,6 +9,7 @@
 
 #include "Engine/Readers/Sar.hpp"
 #include "Engine/Readers/ArchiveParser.hpp"
+#include "Engine/Components/Async.hpp"
 #include "Support/FileIO.hpp"
 
 #include <algorithm>
@@ -182,6 +183,7 @@ bool SarReader::getFileSub(ArchiveInfo *ai, const char *file_name, size_t &len, 
 
 	if (buffer && len > 0) {
 		auto data = std::make_unique<uint8_t[]>(len + 1);
+		Lock lock(ai->file_handle);
 		FileIO::seekFile(ai->file_handle, ai->fi_list[i].offset, SEEK_SET);
 		if (std::fread(data.get(), 1, len, ai->file_handle) != len)
 			throw std::runtime_error("Error reading file");
@@ -207,6 +209,7 @@ bool SarReader::getFileSub(ArchiveInfo *ai, const char *file_name, size_t &len, 
 	if (buffer.size() < len + 1)
 		buffer.resize(len + 1);
 	if (len > 0) {
+		Lock lock(ai->file_handle);
 		FileIO::seekFile(ai->file_handle, ai->fi_list[i].offset, SEEK_SET);
 		if (std::fread(buffer.data(), len, 1, ai->file_handle) != 1)
 			throw std::runtime_error("Error reading file");

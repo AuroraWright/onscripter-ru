@@ -11,6 +11,7 @@
 
 #include "External/Compatibility.hpp"
 #include "External/LRUCache.hpp"
+#include "Support/MemoryBudget.hpp"
 
 #include "Support/SDLCompat.hpp"
 #include "Support/SDLMixerCompat.hpp"
@@ -24,6 +25,7 @@
 #include <cstddef>
 
 struct Wrapped_SDL_Surface {
+	MemoryBudget::Lease retention;
 	SDL_Surface *surface = nullptr;
 	bool has_alpha       = false;
 	Wrapped_SDL_Surface(SDL_Surface *_surface, bool _has_alpha)
@@ -34,6 +36,11 @@ struct Wrapped_SDL_Surface {
 	size_t memoryBytes() const {
 		return surface ? static_cast<size_t>(surface->pitch) * surface->h : 0;
 	}
+	bool retain() {
+		if (!retention)
+			retention = memoryBudget().reserve(MemoryBudget::Kind::Images, memoryBytes());
+		return !!retention;
+	}
 	~Wrapped_SDL_Surface() {
 		if (surface) {
 			//sendToLog(LogLevel::Info, "DELETE %p - %p with ref %d\n",this,surface,surface->refcount);
@@ -41,12 +48,14 @@ struct Wrapped_SDL_Surface {
 		}
 	}
 	Wrapped_SDL_Surface(const Wrapped_SDL_Surface &other) {
+		retention = other.retention;
 		surface = other.surface;
 		if (surface)
 			surface->refcount++;
 		has_alpha = other.has_alpha;
 	}
 	Wrapped_SDL_Surface &operator=(const Wrapped_SDL_Surface &other) {
+		retention = other.retention;
 		if (other.surface)
 			other.surface->refcount++;
 		if (surface)
@@ -58,12 +67,22 @@ struct Wrapped_SDL_Surface {
 };
 
 struct Wrapped_GPU_Image {
+	MemoryBudget::Lease retention;
 	RenderImage *img{nullptr};
+	size_t memoryBytes() const {
+		return img ? static_cast<size_t>(img->w) * img->h * 4 : 0;
+	}
+	bool retain() {
+		if (!retention)
+			retention = memoryBudget().reserve(MemoryBudget::Kind::Pools, memoryBytes());
+		return !!retention;
+	}
 	Wrapped_GPU_Image(RenderImage *image) {
 		//assert(image != nullptr && image->refcount == 1);
 		img = image;
 	}
 	Wrapped_GPU_Image(Wrapped_GPU_Image &&image) noexcept {
+		retention = std::move(image.retention);
 		img       = image.img;
 		image.img = nullptr;
 	}
@@ -72,7 +91,16 @@ struct Wrapped_GPU_Image {
 			img = GPU_CopyImage(image.img);
 	}
 	Wrapped_GPU_Image &operator=(const Wrapped_GPU_Image &) = delete;
-	Wrapped_GPU_Image &operator=(Wrapped_GPU_Image &&) = delete;
+	Wrapped_GPU_Image &operator=(Wrapped_GPU_Image &&other) noexcept {
+		if (this != &other) {
+			if (img)
+				GPU_FreeImage(img);
+			retention = std::move(other.retention);
+			img = other.img;
+			other.img = nullptr;
+		}
+		return *this;
+	}
 	~Wrapped_GPU_Image() {
 		if (img)
 			GPU_FreeImage(img);
@@ -81,7 +109,20 @@ struct Wrapped_GPU_Image {
 
 class Wrapped_Mix_Chunk {
 public:
+	MemoryBudget::Lease retention;
 	Mix_Chunk *chunk{nullptr};
+	size_t memoryBytes() const {
+#if defined(ONS_USE_SDL3)
+		return chunk ? std::max<size_t>(chunk->alen, chunk->capacityBytes) : 0;
+#else
+		return chunk ? chunk->alen : 0;
+#endif
+	}
+	bool retain() {
+		if (!retention)
+			retention = memoryBudget().reserve(MemoryBudget::Kind::Sounds, memoryBytes());
+		return !!retention;
+	}
 	Wrapped_Mix_Chunk(Mix_Chunk *_chunk)
 	    : chunk(_chunk) {}
 	~Wrapped_Mix_Chunk() {
@@ -98,6 +139,14 @@ inline size_t cachedElementApproxBytes(const std::shared_ptr<SETELEM> &) {
 }
 
 inline size_t cachedElementApproxBytes(const std::shared_ptr<Wrapped_SDL_Surface> &elem) {
+	return elem ? elem->memoryBytes() : 0;
+}
+
+inline size_t cachedElementApproxBytes(const std::shared_ptr<Wrapped_GPU_Image> &elem) {
+	return elem ? elem->memoryBytes() : 0;
+}
+
+inline size_t cachedElementApproxBytes(const std::shared_ptr<Wrapped_Mix_Chunk> &elem) {
 	return elem ? elem->memoryBytes() : 0;
 }
 
@@ -123,6 +172,8 @@ protected:
 
 public:
 	void add(const KEY &keyname, const std::shared_ptr<SETELEM> &elem) {
+		if (!elem->retain())
+			return;
 		if (elemCache.size() == 0) {
 			elemCache.set(keyname, elem);
 			return;
@@ -184,6 +235,8 @@ protected:
 
 public:
 	void add(const KEY &keyname, const std::shared_ptr<SETELEM> &elem) {
+		if (!elem->retain())
+			return;
 		const auto result = elemCache.emplace(keyname, elem);
 		if (result.second)
 			cachedBytes += cachedElementApproxBytes(elem);
@@ -267,6 +320,11 @@ public:
 	}
 	void add(int cacheSetNumber, const std::string &filename, std::shared_ptr<SETELEM> elem) {
 		assert(elem);
+		if (!elem->retention && elem->memoryBytes() > memoryBudget().snapshot().limit)
+			return;
+		while (!elem->retain())
+			if (!evictOne())
+				return;
 		CachedSet<SETELEM> *set = nullptr;
 		auto entry = cacheSets.find(cacheSetNumber);
 		if (entry == cacheSets.end()) {
@@ -331,6 +389,7 @@ class ImageCacheController : public CacheController<Wrapped_SDL_Surface> {
 public:
 	void add(int cacheSetNumber, const std::string &filename, const std::shared_ptr<Wrapped_SDL_Surface> &surface);
 	std::shared_ptr<Wrapped_SDL_Surface> get(const std::string &filename) override;
+	size_t availablePrefetchBytes(int cacheSetNumber);
 
 private:
 	size_t decodedSurfaceBudgetBytes{0};

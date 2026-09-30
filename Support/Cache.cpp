@@ -11,6 +11,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <limits>
 
 namespace {
 constexpr size_t DefaultDecodedImageCacheBudgetBytes = 64ULL * 1024ULL * 1024ULL;
@@ -55,6 +56,19 @@ size_t ImageCacheController::cacheBudgetBytes() {
 		decodedSurfaceBudgetInitialized = true;
 	}
 	return decodedSurfaceBudgetBytes;
+}
+
+size_t ImageCacheController::availablePrefetchBytes(int cacheSetNumber) {
+	const size_t budget = cacheBudgetBytes();
+	if (!budget)
+		return std::numeric_limits<size_t>::max();
+	const auto set = cacheSets.find(cacheSetNumber);
+	if (set != cacheSets.end() && dynamic_cast<LRUCachedSet<Wrapped_SDL_Surface> *>(set->second))
+		return budget; // Explicit rolling caches replace old scene assets as usual.
+	// Bulk warmups should stop at the budget instead of decoding the entire
+	// catalog and evicting earlier assets before any of them can be displayed.
+	const size_t used = approximateBytes();
+	return used < budget ? budget - used : 0;
 }
 
 void ImageCacheController::enforceBudget() {
