@@ -164,7 +164,12 @@ while getopts O:defphilm:a:o:r:b:c:g: o; do
             fi;;
         m)
             MMAC_VER_MIN="$OPTARG"
-            MAC_MIN_VER="${MMAC_VER_MIN//./}0"
+            MAC_MIN_MAJOR="${MMAC_VER_MIN%%.*}"
+            if [ "$MAC_MIN_MAJOR" -ge 11 ]; then
+                MAC_MIN_VER="${MMAC_VER_MIN//./}000"
+            else
+                MAC_MIN_VER="${MMAC_VER_MIN//./}0"
+            fi
             MIOS_VER_MIN="$OPTARG"
             IOS_MIN_VER="${MIOS_VER_MIN//./}0" ;;
         a)
@@ -224,6 +229,10 @@ done
 if [ ${#APPLE_ARCH[@]} -eq 0 ]; then
     if $CROSS_BUILD; then
         APPLE_ARCH=("-arch armv7s")
+    elif [[ "$(uname)" == Darwin* && "$(uname -m)" == "arm64" ]]; then
+        APPLE_ARCH=("-arch arm64")
+        MMAC_VER_MIN=11.0
+        MAC_MIN_VER=110000
     else
         APPLE_ARCH=("-arch x86_64")
     fi
@@ -629,7 +638,9 @@ getTarget() {
 getTargetCPU() {
     case $(getTarget) in
         darwin-macOS)
-            if [ "$APPLE_CPU_FLAG" == "-m32" ]; then
+            if in_array "$APPLE_ARCH" "-arch arm64"; then
+                echo "arm64"
+            elif [ "$APPLE_CPU_FLAG" == "-m32" ]; then
                 echo "i686"
             else
                 echo "x86_64"
@@ -717,13 +728,18 @@ case $(getHost) in
             #warn "Failed to find a specified MacOSX SDK, performing a search"
             MAC_SDK=""
 
-            for i in {6..15}; do
-                if [ -d "${MAC_SDK_PATH}/MacOSX10.${i}.sdk" ]; then
-                    MAC_SDK="10.${i}"
-                fi
-            done
+            if [ -d "${MAC_SDK_PATH}/MacOSX.sdk" ]; then
+                MAC_SDK_PATH="$(dirname "$(xcrun --sdk macosx --show-sdk-path)")"
+                MAC_SDK=""
+            else
+                for i in {6..99}; do
+                    if [ -d "${MAC_SDK_PATH}/MacOSX10.${i}.sdk" ]; then
+                        MAC_SDK="10.${i}"
+                    fi
+                done
+            fi
 
-            if [ "${MAC_SDK}" == "" ]; then
+            if [ "${MAC_SDK}" == "" ] && [ ! -d "${MAC_SDK_PATH}/MacOSX.sdk" ]; then
                 error_out "No installed MacOSX SDK found, cannot continue"
             fi
 
@@ -742,15 +758,20 @@ case $(getHost) in
             #warn "Failed to find a specified iOS SDK, performing a search"
             IOS_SDK=""
 
-            for i in {8..15}; do
-                for j in {0..6}; do
-                    if [ -d "${IOS_SDK_PATH}/iPhoneOS${i}.${j}.sdk" ]; then
-                        IOS_SDK="${i}.${j}"
-                    fi
+            if [ -d "${IOS_SDK_PATH}/iPhoneOS.sdk" ]; then
+                IOS_SDK_PATH="$(dirname "$(xcrun --sdk iphoneos --show-sdk-path)")"
+                IOS_SDK=""
+            else
+                for i in {8..99}; do
+                    for j in {0..9}; do
+                        if [ -d "${IOS_SDK_PATH}/iPhoneOS${i}.${j}.sdk" ]; then
+                            IOS_SDK="${i}.${j}"
+                        fi
+                    done
                 done
-            done
+            fi
 
-            if [ "${IOS_SDK}" == "" ]; then
+            if [ "${IOS_SDK}" == "" ] && [ ! -d "${IOS_SDK_PATH}/iPhoneOS.sdk" ]; then
                 error_out "No installed iOS SDK found, cannot continue"
             fi
 
@@ -1024,4 +1045,3 @@ elif [[ $ONSCRLIB_INVALID -eq 1 && $PKGBUILD_RECURSION_DEPTH -eq 1 ]]; then
 fi
 
 msg_stop "Done with %s" "$pkgname"
-

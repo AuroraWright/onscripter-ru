@@ -5,10 +5,12 @@ depends=('libogg')
 sources=(
     "https://raw.githubusercontent.com/umineko-project/onscripter-deps/master/archives/libvorbis-$pkgver.tar.xz"
     'libvorbis-droid-flags.patch'
+    'libvorbis-modern-apple.patch'
 )
 hashes=(
     'af00bb5a784e7c9e69f56823de4637c350643deedaf333d0fa86ecdba6fcb415'
     '4066a7fcab3c75a3c48b589f712edb0ec2107a5ebac7c955fe0c7c7deb376c37'
+    '3ce7a37bc7c24045e7b9f110c162bc8f5ad9134fd9121cdae6933da7a50c971c'
 )
 
 cflags_win32="-mstackrealign"
@@ -25,6 +27,9 @@ prebuild() {
     if [ "$(getTarget)" == "droid" ]; then
         # Seems to be only necessary for x86-like builds
         apply_patch "${sources[1]}"
+    fi
+    if [ "$(getTarget)" == "darwin-macOS" ]; then
+        apply_patch "${sources[2]}"
     fi
 }
 

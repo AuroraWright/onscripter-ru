@@ -26,6 +26,20 @@ make -j8    # Add DEBUG=1 for debugging
 
 #### macOS and iOS
 
+On Apple Silicon, a native command-line build is supported with the system
+Xcode toolchain. The dependency builder selects `arm64` and a macOS 11.0
+deployment target automatically:
+
+```
+./configure --release-build
+make -j8
+```
+
+The resulting executable is written to
+`DerivedData/MacOSX-arm64/onscripter-ru`. A release build is required for
+packaged games that use encrypted `*.file` scripts; development builds only
+accept plaintext scripts such as `0.txt`.
+
 [Xcode](https://developer.apple.com/xcode/) is a requirement regardless of the compilation method. Xcode 9.2 or 9.4 is a recommended choice, Xcode 10 is **NOT** recommended, as you may not be able to target 32-bit 10.6, and its new build system may not be optimised for ONScripter-RU needs. It is suggested to use [MacPorts](https://www.macports.org), as it is supported by Apple and can provide the necessary tools at easy cost.
 
 1. Install the dependencies required to build onscrlib.

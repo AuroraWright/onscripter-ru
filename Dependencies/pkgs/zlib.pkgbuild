@@ -4,17 +4,22 @@ pkgrel=1
 sources=(
     "https://raw.githubusercontent.com/umineko-project/onscripter-deps/master/archives/zlib-$pkgver.tar.xz"
     'zlib-windows-configure.patch'
+    'zlib-modern-apple.patch'
 )
 
 hashes=(
     '4ff941449631ace0d4d203e3483be9dbc9da454084111f97ea0a2114e19bf066'
     'dd46ca3e05fece429a4f32953a7a444439356648a61ee9ac4ac6c1afc22f7b17'
+    'a1d9fa84f0359ecb986976fcc1da38dd665f85652de1431347089e0a17737dd7'
 )
 
 build() {
     pushd "$pkgname-$pkgver" &>/dev/null
     if [ "$(getHost)" == "win32" ]; then
         apply_patch "${sources[1]}"
+    fi
+    if [ "$(getTarget)" == "darwin-macOS" ]; then
+        apply_patch "${sources[2]}"
     fi
     
     msg "Configuring %s" "$pkgname"

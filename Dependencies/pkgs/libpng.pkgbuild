@@ -2,8 +2,21 @@ pkgname=libpng
 pkgver=1.6.37
 pkgrel=1
 depends=('zlib')
-sources=("https://raw.githubusercontent.com/umineko-project/onscripter-deps/master/archives/libpng-${pkgver}.tar.xz")
-hashes=('505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca')
+sources=(
+    "https://raw.githubusercontent.com/umineko-project/onscripter-deps/master/archives/libpng-${pkgver}.tar.xz"
+    'libpng-modern-apple.patch'
+)
+hashes=(
+    '505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca'
+    '567d90a3216915c7dc59d44d0adf56abc2de962d2fddae5d0ed62ece522da9d1'
+)
+
+prebuild() {
+    pushd "$pkgname-$pkgver" &>/dev/null
+    if [ "$(getTarget)" == "darwin-macOS" ]; then
+        apply_patch "${sources[1]}"
+    fi
+}
 
 configopts=(
     '--disable-dependency-tracking'

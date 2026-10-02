@@ -43,6 +43,10 @@ elif [ "${ARCH}" == "arm64" ]; then
   DST="${PROJECT_DIR}/DerivedData/Xcode/onscrlib-arm64"
   BLD_ARCH="arm64"
   IOS=1
+elif [ "${ARCH}" == "macarm64" ]; then
+  DST="${PROJECT_DIR}/DerivedData/Xcode/onscrlib64-arm"
+  BLD_ARCH="arm64"
+  VERMIN="11.0"
 fi
 
 # Trash Xcode overrides.
@@ -82,7 +86,7 @@ if (( $IOS )); then
   ./build.sh -i -a ${BLD_ARCH} onscrlib || ret=1
 else
   ret=0
-  if [ "${ARCH}" == "x86_64h" ]; then
+  if [ "${ARCH}" == "x86_64h" ] || [ "${ARCH}" == "macarm64" ]; then
     ./build.sh -a ${BLD_ARCH} -m ${VERMIN} onscrlib || ret=1
   else
     ./build.sh -a ${BLD_ARCH} -m ${VERMIN} onscrlib && ./build.sh -a ${BLD_ARCH} libcxx || ret=1

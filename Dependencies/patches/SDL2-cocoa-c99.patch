@@ -1,0 +1,40 @@
+--- a/src/video/cocoa/SDL_cocoashape.m
++++ b/src/video/cocoa/SDL_cocoashape.m
+@@ -33,11 +33,15 @@ SDL_WindowShaper*
+ Cocoa_CreateShaper(SDL_Window* window)
+ {
+     SDL_WindowData* windata = (SDL_WindowData*)window->driverdata;
++    SDL_WindowShaper* result;
++    SDL_ShapeData* data;
++    int resized_properly;
++
+     [windata->nswindow setOpaque:NO];
+ 
+     [windata->nswindow setStyleMask:NSWindowStyleMaskBorderless];
+ 
+-    SDL_WindowShaper* result = result = malloc(sizeof(SDL_WindowShaper));
++    result = malloc(sizeof(SDL_WindowShaper));
+     result->window = window;
+     result->mode.mode = ShapeModeDefault;
+     result->mode.parameters.binarizationCutoff = 1;
+@@ -45,12 +49,12 @@ Cocoa_CreateShaper(SDL_Window* window)
+     result->userx = result->usery = 0;
+     window->shaper = result;
+ 
+-    SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));
++    data = malloc(sizeof(SDL_ShapeData));
+     result->driverdata = data;
+     data->context = [windata->nswindow graphicsContext];
+     data->saved = SDL_FALSE;
+     data->shape = NULL;
+ 
+-    int resized_properly = Cocoa_ResizeWindowShape(window);
++    resized_properly = Cocoa_ResizeWindowShape(window);
+     SDL_assert(resized_properly == 0);
+     return result;
+ }
+--- a/configure.in
++++ b/configure.in
+@@ -1354,1 +1354,1 @@
+-        EXTRA_CFLAGS="$EXTRA_CFLAGS -Wdeclaration-after-statement -Werror=declaration-after-statement"
++        EXTRA_CFLAGS="$EXTRA_CFLAGS -Wdeclaration-after-statement"

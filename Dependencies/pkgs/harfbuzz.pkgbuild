@@ -24,6 +24,7 @@ configopts=(
 )
 
 ldflags="-L$outdir/lib -lfreetype"
+cflags_mac_extra="-DHB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR"
 # Xcode 10 does not have libstdc++
 if [ "$MMAC_VER_MIN" != "10.6" ]; then
     ldflags_mac_extra="-stdlib=libc++"

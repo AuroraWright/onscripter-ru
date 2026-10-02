@@ -9,6 +9,7 @@ sources=(
     'SDL2-eventloop-mac.patch'
     'SDL2-force-metal-ios.patch'
     'SDL2-sensor-ios.patch'
+    'SDL2-cocoa-c99.patch'
 )
 hashes=(
     '255186dc676ecd0c1dbf10ec8a2cc5d6869b5079d8a38194c2aecdff54b324b1'
@@ -18,6 +19,7 @@ hashes=(
     '8d86b718ec4ebea6cc49d7457d02cc23eef90a73ef325dadf462e03bc15673b6'
     '56c704a533320c3f4c61f334420fbc9881938e00c5fd2e5bbc98a6a7309ea9fc'
     '39ee540876ac2bbd1d9595df186b77a174a0507a048853252e8fd60df1df5f04'
+    'dd9e289c7e0d6d8bf1da0521416b2bc5f7356848f84b12b59a02437fb45825a7'
 )
 
 cflags="-O3"
@@ -30,8 +32,19 @@ configopts_win32=(
 
 configopts_mac_extra=(
     '--disable-video-x11'
+    '--disable-video-opengles'
+    '--disable-video-opengles1'
+    '--disable-video-opengles2'
     '--disable-render-metal'
 )
+
+if in_array "$APPLE_ARCH" "-arch arm64"; then
+    configopts_mac_extra=(
+        '--build=aarch64-apple-darwin'
+        '--host=aarch64-apple-darwin'
+        "${configopts_mac_extra[@]}"
+    )
+fi
 
 if option_set 'dynamic_sdl'; then
     sharedstatic="static"
@@ -73,6 +86,7 @@ prebuild() {
         ;;
         darwin-macOS)
             apply_patch "${sources[4]}"
+            apply_patch "${sources[7]}"
         ;;
         droid)
             export CC="$(getCC)"

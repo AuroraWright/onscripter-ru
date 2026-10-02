@@ -27,7 +27,17 @@ addcrossopt=false
 
 giturl=git://source.ffmpeg.org/ffmpeg.git
 
-if [ "$APPLE_CPU_FLAG" == "-m32" ]; then
+if [ "$(getTarget)" == "darwin-macOS" ] && in_array "$APPLE_ARCH" "-arch arm64"; then
+    cflags_mac_extra="-D__STDC_CONSTANT_MACROS -Wno-error=incompatible-function-pointer-types -mmacosx-version-min=$MMAC_VER_MIN"
+    configopts_mac=(
+        '--arch=aarch64'
+        "--cc=$(getCC)"
+        '--enable-videotoolbox'
+        '--disable-vda'
+        '--enable-pic'
+        '--disable-decoders'
+    )
+elif [ "$APPLE_CPU_FLAG" == "-m32" ]; then
     cflags_mac_extra="-D__STDC_CONSTANT_MACROS -march=i686 -mmacosx-version-min=$MMAC_VER_MIN"
     configopts_mac=(
         '--arch=x86_32'

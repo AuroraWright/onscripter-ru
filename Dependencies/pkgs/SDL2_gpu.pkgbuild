@@ -72,13 +72,17 @@ build() {
             lcf="${lcf/-O/-Os}"
             target=""
             cxxstd=""
+            gl1opt=""
+            if in_array "$APPLE_ARCH" "-arch arm64"; then
+                gl1opt="-DSDL_gpu_DISABLE_OPENGL_1=ON"
+            fi
             if [ "$MMAC_VER_MIN" != "" ]; then
                 target="-DCMAKE_OSX_DEPLOYMENT_TARGET=$MMAC_VER_MIN"
                 if [ "$MMAC_VER_MIN" != "10.6" ]; then
                     cxxstd="-std=c++11 -stdlib=libc++"
                 fi
             fi
-            cmake -G "Unix Makefiles" -DSDL_gpu_USE_SYSTEM_EPOXY=ON -DCMAKE_CXX_COMPILER="$(getCXX)" -DCMAKE_C_COMPILER="$(getCC)" -DCMAKE_C_FLAGS="$lcf" -DCMAKE_CXX_FLAGS="$lcxf $cxxstd" $target &>"$logfile" || ret=$?
+            cmake -G "Unix Makefiles" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_OSX_ARCHITECTURES="$(getTargetCPU)" -DSDL_gpu_USE_SYSTEM_EPOXY=ON $gl1opt -DCMAKE_CXX_COMPILER="$(getCXX)" -DCMAKE_C_COMPILER="$(getCC)" -DCMAKE_C_FLAGS="$lcf" -DCMAKE_CXX_FLAGS="$lcxf $cxxstd" $target &>"$logfile" || ret=$?
         ;;
         darwin-iOS)
             cmake -G "Unix Makefiles" -DCMAKE_OSX_SYSROOT="/" -DCMAKE_OSX_DEPLOYMENT_TARGET="" -DSDL_gpu_DISABLE_OPENGL=ON -DSDL_gpu_DISABLE_GLES=OFF -DCMAKE_CXX_COMPILER="$(getCXX)" -DCMAKE_C_COMPILER="$(getCC)" -DCMAKE_C_FLAGS="$lcf" -DCMAKE_CXX_FLAGS="$lcxf" $target &>"$logfile" || ret=$?
