@@ -116,9 +116,10 @@ Requirements: Android 11 or newer.
 4. Install the APK.
 5. Launch **onscripter-new**.
 
-The APK contains the engine, not the game. Extract `umineko-menu-update.zip`
-from the same release into your game folder to install the music-title, Tips,
-Grimoire, and Config script fixes. These files are also in the Windows package.
+The APK contains the engine, not the game. Extract
+`onscripter-new-android-assets.zip` from the same release into your game folder,
+replacing the included files. This ZIP supplies the same English, Witch Hunt,
+and Russian scripts and all loose assets included in the Windows package.
 
 ### Verifying downloads
 

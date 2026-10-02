@@ -36,7 +36,7 @@ public:
 
 	bool prepare();
 	bool startPlayback();
-	bool update(uint32_t &toAdd);
+	bool playbackTimeNanos(uint64_t &elapsed) const;
 
 private:
 	static void fillBuffers(int channel, void *stream, int len, void *udata);
@@ -55,5 +55,5 @@ private:
 
 	std::atomic<bool> startedToPlay{false}; // A signal that SDL_mixer started to play the sound
 	std::atomic<bool> started{false};       // A signal that we called SDL_mixer to play the sound
-	uint32_t startedTime{0};                // A timestamp when audio started to play (SDL_GetTicks())
+	uint64_t startedTime{0};                // Monotonic timestamp published by startedToPlay
 };

@@ -9,6 +9,7 @@
 
 #include "Support/AudioBridge.hpp"
 #include "Support/FileDefs.hpp"
+#include "Support/WorkScheduler.hpp"
 
 #include <iostream>
 #include <algorithm>
@@ -51,18 +52,15 @@ void AudioBridge::fillBuffers(int /*channel*/, void * /*stream*/, int /*len*/, v
 	} while (rawPos != ab->rawBufferSize);
 
 	if (!ab->startedToPlay.load(std::memory_order_acquire)) {
-		ab->startedTime = SDL_GetTicks();
+		ab->startedTime = WorkSchedule::now();
 		ab->startedToPlay.store(true, std::memory_order_release);
 	}
 }
 
-bool AudioBridge::update(uint32_t &toAdd) {
+bool AudioBridge::playbackTimeNanos(uint64_t &elapsed) const {
 	if (!startedToPlay.load(std::memory_order_acquire))
 		return false;
-	if (startedTime != 0) {
-		toAdd       = SDL_GetTicks() - startedTime;
-		startedTime = 0;
-	}
+	elapsed = WorkSchedule::now() - startedTime;
 	return true;
 }
 

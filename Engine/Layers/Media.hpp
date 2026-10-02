@@ -80,4 +80,5 @@ private:
 
 	int framesToAdvance{0};
 	Clock mediaClock;
+	uint64_t playbackStartedAt{0};
 };

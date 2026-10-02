@@ -12,6 +12,7 @@
 #include "Engine/Graphics/GPU.hpp"
 #include "Engine/Core/ONScripter.hpp"
 #include "Support/FileDefs.hpp"
+#include "Support/WorkScheduler.hpp"
 
 MediaLayer::MediaLayer(int w, int h, BaseReader **br) {
 	reader = br;
@@ -124,6 +125,8 @@ bool MediaLayer::loadPresentation(bool alphaMasked, bool loop, std::string &sub_
 	// 0 here would make it need a 1/fps delay before displaying anything
 	framesToAdvance = 1;
 	nanosPerFrame   = media.getNanosPerFrame();
+	mediaClock.reset();
+	playbackStartedAt = 0;
 
 	if (ret) {
 		/* Load subtitles */
@@ -200,42 +203,26 @@ void MediaLayer::freeTransientVideoImages() {
 	}
 }
 
-bool MediaLayer::update(bool old) {
+bool MediaLayer::update(bool /*old*/) {
 	// Not much to do here, although I doubt this can happen
-	if (!sprite)
+	if (!sprite || (videoState & VS_END_OF_FILE) || !(videoState & VS_PLAYING))
 		return true;
-	auto sp = old ? sprite->oldNew(REFRESH_BEFORESCENE_MODE) : sprite;
 
-	// Reset clock if:
-	// - EOF reached;
-	// - not playing;
-	// - we are uncommitted
-	// Also reset the clock to avoid going forward before staring playback
-	if ((videoState & (VS_END_OF_FILE | VS_AWAITS_COMMIT)) || !(videoState & VS_PLAYING)) {
-		sp->clock.reset();
-		// Do not update unless we have not
-		if (!(videoState & VS_AWAITS_COMMIT))
+	// Audio keeps running during slow frames and loads, whereas the game's
+	// animation clock can discard that time when frame pacing is reset. Use
+	// elapsed playback time so a stall drops late video frames instead of
+	// leaving the picture permanently behind a separately played soundtrack.
+	uint64_t elapsed = 0;
+	if (audioBridge) {
+		if (!audioBridge->playbackTimeNanos(elapsed))
 			return true;
+	} else if (!(videoState & VS_AWAITS_COMMIT)) {
+		elapsed = WorkSchedule::now() - playbackStartedAt;
 	}
-
-	//sendToLog(LogLevel::Info, "MediaLayer::update. Total: %i, Lap: %i, ", mediaClock.time(), mediaClock.lap());
-	uint32_t toAdd{0};
-
-	// Do not update until audio plays if it is enabled
-	if (media.hasStream(MediaProcController::AudioEntry) && audioBridge && !audioBridge->update(toAdd))
-		return true;
-
-	if (toAdd != 0) {
-		sp->clock.reset();
-		//sendToLog(LogLevel::Info, "toAdd %d\n", toAdd);
-	}
-
-	auto objectClockLap = sp->clock.lapNanos();
-
-	//sendToLog(LogLevel::Info, "mediaClock: %llu, yesobjectClock: %llu, objectClockLap: %llu\n", mediaClock.timeNanos(), object->clock.timeNanos(), objectClockLap);
-	mediaClock.tickNanos(objectClockLap);
-	if (toAdd != 0)
-		mediaClock.tick(toAdd);
+	// Silent video only prepares its first frame before commit. Repeated
+	// updates for the before/after scene must not count the same time twice.
+	if (elapsed > mediaClock.timeNanos())
+		mediaClock.tickNanos(elapsed - mediaClock.timeNanos());
 	if (!mediaClock.hasCountdown())
 		mediaClock.addCountdownNanos(nanosPerFrame);
 	while (mediaClock.expired()) {
@@ -328,6 +315,8 @@ void MediaLayer::commit() {
 		frame_gpu[DefFrame] = frame_gpu[NewFrame];
 		frame_gpu[NewFrame] = nullptr;
 	}
+	if (videoState & VS_AWAITS_COMMIT)
+		playbackStartedAt = WorkSchedule::now();
 	videoState &= ~VS_AWAITS_COMMIT;
 }
 
