@@ -49,6 +49,7 @@ bool shellOpen(const std::string &path, FileType type = FileType::Any);
 const char *getLaunchDir();
 const char *getWorkingDir();
 const char *getHomeDir();
+const char *getBundleResourceDir(); // may return nullptr
 const char *getPlatformSpecificDir(); // may return nullptr
 const char *getStorageDir(bool cloud = false);
 

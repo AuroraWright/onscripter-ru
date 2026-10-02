@@ -109,11 +109,11 @@ void *__wrap_SDL_LoadObject(const char *sofile) {
 	printf(" -r, --root path                  set the root path to the game\n");
 	printf(" -s, --save path                  set the path to use for saved games\n");
 #if defined(WIN32)
-	printf("     --disable-icloud             do not store saved games in iCloud for Windows\n");
+	printf("     --enable-icloud              store saved games in iCloud for Windows (off by default)\n");
 	printf("     --current-user-appdata       use the current user's AppData folder instead of AllUsers' AppData\n");
 	printf("     --use-console                use Windows Console for application output\n");
 #elif defined(MACOSX)
-	printf("     --disable-icloud             do not store saved games in iCloud\n");
+	printf("     --enable-icloud              store saved games in iCloud (off by default)\n");
 	printf("     --skip-on-cmd                Cmd key behaves like Ctrl\n");
 #endif
 	printf("     --use-logfile                use out.txt and err.txt for application output\n");
@@ -376,7 +376,11 @@ static void parseOptions(int argc, char **argv, bool &hasArchivePath) {
 				argc--;
 				argv++;
 				ons.ons_cfg_options["force-fps"] = argv[0];
+			} else if (!std::strcmp(argv[0] + 1, "-enable-icloud")) {
+				ons.ons_cfg_options.erase("disable-icloud");
+				ons.ons_cfg_options["enable-icloud"] = "noval";
 			} else if (!std::strcmp(argv[0] + 1, "-disable-icloud")) {
+				ons.ons_cfg_options.erase("enable-icloud");
 				ons.ons_cfg_options["disable-icloud"] = "noval";
 			} else if (!std::strcmp(argv[0] + 1, "-force-vsync")) {
 				ons.ons_cfg_options["force-vsync"] = "noval";
@@ -812,6 +816,10 @@ int main(int argc, char **argv) {
 		// Try app launch dir
 		works = initWithPath(FileIO::getLaunchDir(), hasArchivePath);
 
+		// A macOS application bundle conventionally stores its data here.
+		if (!works && FileIO::getBundleResourceDir())
+			works = initWithPath(FileIO::getBundleResourceDir(), hasArchivePath);
+
 		// Try app working dir
 		if (!works)
 			works = initWithPath(FileIO::getWorkingDir(), hasArchivePath);
@@ -832,7 +840,7 @@ int main(int argc, char **argv) {
 	auto &opts = ons.ons_cfg_options;
 
 	if (!FileIO::setStorageDir(opts.find("current-user-appdata") != opts.end()) ||
-	    !FileIO::makeDir(FileIO::getStorageDir(opts.find("disable-icloud") == opts.end()), nullptr, true))
+	    !FileIO::makeDir(FileIO::getStorageDir(opts.find("enable-icloud") != opts.end()), nullptr, true))
 		performTerminate("Failed to access storage directory!");
 
 	if (FileIO::getLogMode() == FileIO::LogMode::File) {
