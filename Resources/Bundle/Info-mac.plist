@@ -30,6 +30,8 @@
 	<string>Copyright © 2019 Umineko Project. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
+	<key>NSHighResolutionCapable</key>
+	<false/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

@@ -83,7 +83,9 @@ GPU_Target *GPUController::rendererInitWithInfo(GPURendererInfo &info, uint16_t 
 		          (it == ons.ons_cfg_options.end() ? "set automatically" : "provided by user"),
 		          max_chunk);
 
-		if (w != window.script_width || h != window.script_height)
+		// On high-DPI displays the GPU target is larger than the SDL window even
+		// when the requested window size matches the script resolution.
+		if (screen->w != window.script_width || screen->h != window.script_height)
 			GPU_SetVirtualResolution(screen, window.script_width, window.script_height);
 		window.setMainTarget(screen);
 

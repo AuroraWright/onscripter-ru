@@ -76,6 +76,8 @@ class WindowController : public BaseController {
 	// Currently in fullscreen transition state.
 	bool fullscreen_needs_fix{false};
 
+	void updateFullscreenGeometry(int display_width, int display_height);
+
 public:
 	// Resolution the script runs at.
 	int script_width{0}, script_height{0};

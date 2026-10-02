@@ -173,6 +173,31 @@ void WindowController::getWindowSize(int &w, int &h) {
 	h = screen_height;
 }
 
+void WindowController::updateFullscreenGeometry(int display_width, int display_height) {
+	if (scaled_flag) {
+		float stretch_x = display_width / static_cast<float>(script_width);
+		float stretch_y = display_height / static_cast<float>(script_height);
+
+		// Constrain the fullscreen rendering area to the game's aspect ratio.
+		if (stretch_x > stretch_y) {
+			fullscreen_width  = std::round(static_cast<float>(script_width * display_height) / script_height);
+			fullscreen_height = display_height;
+		} else {
+			fullscreen_width  = display_width;
+			fullscreen_height = std::round(static_cast<float>(script_height * display_width) / script_width);
+		}
+	}
+
+	fullscript_width    = script_width * display_width / static_cast<float>(fullscreen_width);
+	fullscript_height   = script_height * display_height / static_cast<float>(fullscreen_height);
+	fullscript_offset_x = (fullscript_width - script_width) / 2 - system_offset_x;
+	fullscript_offset_y = (fullscript_height - script_height) / 2 - system_offset_y;
+	// A hack for some resolutions to solve scaling issues like random stripes,
+	// e.g. 1366x768 with a full-screen white image.
+	fullscreen_reduced_clip = {fullscript_offset_x + 0.5f, fullscript_offset_y + 0.5f,
+	                           script_width - 1.0f, script_height - 1.0f};
+}
+
 bool WindowController::updateDisplayData(bool getpos) {
 	if (getpos)
 		SDL_GetWindowPosition(window, &window_x, &window_y);
@@ -226,38 +251,9 @@ bool WindowController::updateDisplayData(bool getpos) {
 		//sendToLog(LogLevel::Info, "Display %u: %u x %u (visible area %u)\n", display->id, display->native_width, display->native_height, display->visibleArea);
 	}
 
-	if (scaled_flag) {
-		assert(displayData.fullscreenDisplay);
-		float scr_stretch_x = displayData.fullscreenDisplay->native_width / static_cast<float>(screen_width);
-		float scr_stretch_y = displayData.fullscreenDisplay->native_height / static_cast<float>(screen_height);
-
-		// This was marked "Deprecated and should be removed" -- now it only exists in this one place. The suspicious +0.5 makes me hesitant to refactor to remove this variable.
-		int screen_ratio1, screen_ratio2;
-
-		// Constrain aspect to same as game
-		if (scr_stretch_x > scr_stretch_y) {
-			screen_ratio1 = displayData.fullscreenDisplay->native_height;
-			screen_ratio2 = script_height;
-		} else {
-			screen_ratio1 = displayData.fullscreenDisplay->native_width;
-			screen_ratio2 = script_width;
-		}
-
-		fullscreen_width  = std::round(static_cast<float>(script_width * screen_ratio1) / screen_ratio2);
-		fullscreen_height = std::round(static_cast<float>(script_height * screen_ratio1) / screen_ratio2);
-	}
-
 	if (displayData.fullscreenDisplay) {
-		fullscript_width    = script_width * displayData.fullscreenDisplay->native_width / static_cast<float>(fullscreen_width);
-		fullscript_height   = script_height * displayData.fullscreenDisplay->native_height / static_cast<float>(fullscreen_height);
-		fullscript_offset_x = (fullscript_width - script_width) / 2 - system_offset_x;
-		fullscript_offset_y = (fullscript_height - script_height) / 2 - system_offset_y;
-		// A hack for some resolutions to solve scaling issues like random stripes
-		// e. g. 1366x768
-		// bg white,1
-		// lsp s0_1,"white1080p.png",0,0
-		// print 1
-		fullscreen_reduced_clip = {fullscript_offset_x + 0.5f, fullscript_offset_y + 0.5f, script_width - 1.0f, script_height - 1.0f};
+		updateFullscreenGeometry(displayData.fullscreenDisplay->native_width,
+		                         displayData.fullscreenDisplay->native_height);
 
 		return true;
 	}
@@ -319,6 +315,15 @@ bool WindowController::changeMode(bool perform, bool correct, int mode) {
 	}
 
 	if (correct) {
+		if (fullscreen_mode) {
+			int actual_width, actual_height;
+			SDL_GetWindowSize(window, &actual_width, &actual_height);
+			updateFullscreenGeometry(actual_width, actual_height);
+			screen_width  = fullscreen_width;
+			screen_height = fullscreen_height;
+			GPU_SetWindowResolution(actual_width, actual_height);
+			gpu.setVirtualResolution(fullscript_width, fullscript_height);
+		}
 		// Set correct window dimensions (we are returning to windowed mode)
 		if (!fullscreen_mode) {
 			screen_width  = windowed_screen_width;
