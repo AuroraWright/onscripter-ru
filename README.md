@@ -3,7 +3,7 @@
 **A modern engine for playing Umineko Project on current PCs and Android
 devices.**
 
-`onscripter-new` is based on [ONScripter-RU](https://github.com/umineko-project/onscripter-ru),
+`ONScripter-NEW` is based on [ONScripter-RU](https://github.com/umineko-project/onscripter-ru),
 the engine used by Umineko Project. It keeps compatibility with the game while
 improving performance, frame pacing, media playback, menus, and support for
 modern systems.
@@ -56,7 +56,7 @@ See [Tests/README.md](Tests/README.md) for sanitizer and fuzzing options and
 [SECURITY.md](SECURITY.md) for the vulnerability-reporting and trust-boundary
 policy.
 
-## Why use onscripter-new?
+## Why use ONScripter-NEW?
 
 - Smoother animation and rain effects, especially on high-refresh displays.
 - Faster menus, text rendering, save/load operations, and scene composition.
@@ -76,7 +76,7 @@ engine feel at home on modern hardware.
 ONScripter-RU remains the foundation of this project. The two projects now have
 different priorities:
 
-| | ONScripter-RU | onscripter-new |
+| | ONScripter-RU | ONScripter-NEW |
 | --- | --- | --- |
 | **Purpose** | The original customized engine behind Umineko Project, with its established compatibility and behavior. | A modern continuation focused on current Umineko Project releases. |
 | **Graphics** | Retains older rendering paths for wider compatibility. | Uses SDL3 and Vulkan, with native shaders and GPU-accelerated video conversion. |
@@ -85,7 +85,7 @@ different priorities:
 | **Platforms** | Supports a wider range of older systems and build configurations. | Provides modern 64-bit Windows and Android packages, with other platforms available to build from source. |
 | **Best choice when…** | You need the original engine, its broader historical configurations, or an older-system build. | You want the maintained modern engine and release package for Umineko Project. |
 
-Both engines are closely tied to Umineko Project. `onscripter-new` is not a
+Both engines are closely tied to Umineko Project. `ONScripter-NEW` is not a
 clean-sheet replacement; it trades some of ONScripter-RU's older platform and
 renderer flexibility for a smaller, modern stack and more active optimization
 of the current game package.
@@ -146,7 +146,7 @@ by that project.
 
 ## Credits
 
-`onscripter-new` builds on the work of:
+`ONScripter-NEW` builds on the work of:
 
 - Ogapee and the original ONScripter contributors
 - “Uncle” Mion Sonozaki and ONScripter-RU contributors
