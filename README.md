@@ -1,4 +1,4 @@
-# onscripter-new
+# ONScripter-NEW
 
 **A modern engine for playing Umineko Project on current PCs and Android
 devices.**
