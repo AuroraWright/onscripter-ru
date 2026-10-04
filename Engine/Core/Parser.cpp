@@ -9,6 +9,7 @@
 
 #include "Engine/Core/Parser.hpp"
 #include "Engine/Components/Async.hpp"
+#include "Engine/Components/Dialogue.hpp"
 #include "Engine/Components/Window.hpp"
 #include "Engine/Readers/Direct.hpp"
 #include "Support/FileIO.hpp"
@@ -421,8 +422,16 @@ int ScriptParser::parseLine() {
 	script_h.current_cmd[0]   = '\0';
 	script_h.current_cmd_type = ScriptHandler::CmdType::None;
 
-	if (*cmd == ';')
+	if (*cmd == ';') {
+		static constexpr char WebSocketDirective[] = ";@websocket";
+		if (!std::strncmp(cmd, WebSocketDirective, sizeof(WebSocketDirective) - 1)) {
+			const char *directiveEnd = cmd + sizeof(WebSocketDirective) - 1;
+			while (*directiveEnd == ' ' || *directiveEnd == '\t') directiveEnd++;
+			if (*directiveEnd == '\0')
+				dlgCtrl.markNextTextForWebSocket();
+		}
 		return RET_CONTINUE;
+	}
 	if (*cmd == '*')
 		return RET_CONTINUE;
 	if (*cmd == ':')

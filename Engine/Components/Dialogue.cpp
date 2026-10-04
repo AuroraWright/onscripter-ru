@@ -13,6 +13,7 @@
 #include "Engine/Core/ONScripter.hpp"
 #include "Engine/Entities/Font.hpp"
 #include "Support/Unicode.hpp"
+#include "Support/TextWebSocket.hpp"
 
 #include <SDL2/SDL_gpu.h>
 
@@ -24,6 +25,25 @@
 #include <locale>
 
 DialogueController dlgCtrl;
+
+#if !defined(IOS) && !defined(DROID)
+static std::string renderedText(TextRenderingState &state, size_t firstSegment = 0) {
+	std::u16string result;
+	for (size_t segmentIndex = firstSegment; segmentIndex < state.segments.size(); ++segmentIndex) {
+		auto &segment = state.segments[segmentIndex];
+		for (size_t runIndex = 0; runIndex < segment.runs.size(); ++runIndex) {
+			for (auto &piece : segment.runs[runIndex].pieces) {
+				for (auto &glyph : piece.charRenderBuffer) {
+					if (!glyph.renderRubyHere && !glyph.applyNewFontinfoHere && glyph.codepoint &&
+					    glyph.codepoint != '\n' && glyph.codepoint != '\r')
+						result.push_back(glyph.codepoint);
+				}
+			}
+		}
+	}
+	return decodeUTF16String(result);
+}
+#endif
 
 // ---------------------------------------------------------
 // Class functions
@@ -37,8 +57,20 @@ int DialogueController::ownInit() {
 int DialogueController::ownDeinit() {
 	// Clean the images in the dialogue controller
 	setDialogueActive(false);
+	nextTextForWebSocket = false;
 
 	return 0;
+}
+
+void DialogueController::markNextTextForWebSocket() {
+	nextTextForWebSocket = true;
+}
+
+bool DialogueController::consumeNextTextForWebSocket() {
+	if (!nextTextForWebSocket)
+		return false;
+	nextTextForWebSocket = false;
+	return true;
 }
 
 // ----------------------- functions related to processing, parsing, execution -----------------------------
@@ -467,6 +499,9 @@ void DialogueController::layoutDialogue() {
 	if (!(ons.skip_mode & ONScripter::SKIP_SUPERSKIP))
 		fi.set(ons.sentence_font);
 
+#if !defined(IOS) && !defined(DROID)
+	size_t firstSegment = dialogueRenderState.segments.size();
+#endif
 	unsigned int pos{0};
 	if (!(ons.skip_mode & ONScripter::SKIP_SUPERSKIP))
 		dialogueRenderState.clickParts.emplace_back();
@@ -524,6 +559,9 @@ void DialogueController::layoutDialogue() {
 
 	layoutLines(dialogueRenderState);
 	wndCtrl.updateTextboxExtension(false);
+#if !defined(IOS) && !defined(DROID)
+	textWebSocketServer.broadcast(renderedText(dialogueRenderState, firstSegment));
+#endif
 
 	decodeUTF8String(dataPartC, dataPartUnicode);
 	dialogueProcessingState.layoutDone = true;
@@ -705,6 +743,10 @@ void DialogueController::renderToTarget(GPU_Target *dst, GPU_Rect *dstClip, std:
 	// Then, once we know which glyphs are on which line, line-specific processing like centering is performed.
 	layoutLines(state);
 	if (dst) {
+#if !defined(IOS) && !defined(DROID)
+		if (consumeNextTextForWebSocket())
+			textWebSocketServer.broadcast(renderedText(state));
+#endif
 		// Finally, the characters are rendered in the positions they were layouted to.
 		render(state);
 	} else if (dstClip) {
@@ -727,6 +769,10 @@ void DialogueController::prepareForRendering(const char *buf, Fontinfo &f_info, 
 
 	layoutLines(state);
 	getRenderingBounds(state);
+#if !defined(IOS) && !defined(DROID)
+	if (consumeNextTextForWebSocket())
+		textWebSocketServer.broadcast(renderedText(state));
+#endif
 
 	if (state.getPieces(true).size() != state.getPieces().size()) {
 		// Ruby can be wider than the text it annotates and therefore extend past the

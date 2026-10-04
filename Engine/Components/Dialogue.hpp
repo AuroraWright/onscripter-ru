@@ -349,6 +349,7 @@ public:
 	void setDialogueActive(bool active = true);
 	void layoutName();
 	void layoutDialogue();
+	void markNextTextForWebSocket();
 	// for specialscrollable rendering
 	void renderToTarget(GPU_Target *dst, GPU_Rect *dstClip, char *buf, Fontinfo *f_info = nullptr, bool paddingShift = true, int tightlyFit = FIT_MODE::FIT_BOTH);
 	void renderToTarget(GPU_Target *dst, GPU_Rect *dstClip, std::u16string &text, Fontinfo *f_info = nullptr, bool paddingShift = true, int tightlyFit = FIT_MODE::FIT_BOTH);
@@ -381,6 +382,9 @@ public:
 
 private:
 	char *endOfCommand{nullptr};
+	bool nextTextForWebSocket{false};
+
+	bool consumeNextTextForWebSocket();
 
 	void layoutSegment(TextRenderingState &state, std::u16string text, Fontinfo &fi);
 	DialoguePiece layoutPiece(TextRenderingState &state, std::u16string &text, Fontinfo &fontInfo, std::deque<DialoguePiece> *rubyPieces);

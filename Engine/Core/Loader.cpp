@@ -174,6 +174,9 @@ void *__wrap_SDL_LoadObject(const char *sofile) {
 	printf("     --font-dir                   provides language-specific font directory\n");
 	printf("     --system-offset-x            left offset to compensate for system forced offset\n");
 	printf("     --system-offset-y            top offset to compensate for system forced offset\n");
+#if !defined(IOS) && !defined(DROID)
+	printf("     --text-websocket host:port   stream rendered text over WebSocket\n");
+#endif
 	printf(" -h, --help                       show this help and exit\n");
 	printf(" -v, --version                    show the version information and exit\n");
 	FileIO::waitConsole();
@@ -500,6 +503,12 @@ static void parseOptions(int argc, char **argv, bool &hasArchivePath) {
 				argc--;
 				argv++;
 				ons.ons_cfg_options["system-offset-y"] = argv[0];
+#if !defined(IOS) && !defined(DROID)
+			} else if (!std::strcmp(argv[0] + 1, "-text-websocket")) {
+				argc--;
+				argv++;
+				ons.ons_cfg_options["text-websocket"] = argv[0];
+#endif
 			} else {
 				char errstr[256];
 				std::snprintf(errstr, sizeof(errstr), "unknown option %s", argv[0]);

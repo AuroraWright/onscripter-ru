@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10000000000000000000011 /* TextWebSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* TextWebSocket.cpp */; };
+		A10000000000000000000012 /* TextWebSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* TextWebSocket.cpp */; };
+		A10000000000000000000013 /* TextWebSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* TextWebSocket.cpp */; };
 		1C0A5FFC17478F6A004A9BCC /* embed.c in Sources */ = {isa = PBXBuildFile; fileRef = 1C0A5FEC17478F3F004A9BCC /* embed.c */; };
 		2FD1DB231D52107B00362A7C /* slre.c in Sources */ = {isa = PBXBuildFile; fileRef = 1CD59BB4180D4441005A57A7 /* slre.c */; };
 		2FD1DB261D52108C00362A7C /* GPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C7B87CD1799A24500FA05F3 /* GPU.cpp */; };
@@ -715,6 +718,8 @@
 		CEC5C3D91EB856AB0044AB50 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
 		CEC81E2B1E3BD9F100C27578 /* FileIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileIO.cpp; sourceTree = "<group>"; };
 		CEC81E2C1E3BD9F100C27578 /* FileIO.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FileIO.hpp; sourceTree = "<group>"; };
+		A10000000000000000000001 /* TextWebSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextWebSocket.cpp; sourceTree = "<group>"; };
+		A10000000000000000000002 /* TextWebSocket.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TextWebSocket.hpp; sourceTree = "<group>"; };
 		CECE894D1DE426FB003BB424 /* defaultVertex.gles.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = defaultVertex.gles.vert; sourceTree = "<group>"; };
 		CECE894E1DE426FB003BB424 /* defaultVertex.gl.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = defaultVertex.gl.vert; sourceTree = "<group>"; };
 		CEDB260D20DF2D5100E79DC4 /* Window.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Window.cpp; sourceTree = "<group>"; };
@@ -1305,6 +1310,8 @@
 				CEC81E2C1E3BD9F100C27578 /* FileIO.hpp */,
 				CEDB263D20E000FC00E79DC4 /* FileDefs.hpp */,
 				1C7E88771AA254080039699B /* KeyState.hpp */,
+				A10000000000000000000001 /* TextWebSocket.cpp */,
+				A10000000000000000000002 /* TextWebSocket.hpp */,
 				CE24317B1E3A6A50003276DA /* Unicode.cpp */,
 				CE24317C1E3A6A50003276DA /* Unicode.hpp */,
 			);
@@ -2328,6 +2335,7 @@
 				CE61AC5620E3C0E1000B31C7 /* DirPaths.cpp in Sources */,
 				CE61AC5720E3C0E1000B31C7 /* DirtyRect.cpp in Sources */,
 				CE61AC5820E3C0E1000B31C7 /* FileIO.cpp in Sources */,
+				A10000000000000000000011 /* TextWebSocket.cpp in Sources */,
 				CE61AC5920E3C0E1000B31C7 /* Unicode.cpp in Sources */,
 				CE61AC5A20E3C0E1000B31C7 /* slre.c in Sources */,
 			);
@@ -2398,6 +2406,7 @@
 				CE9D80CF20E3CA9200670C17 /* DirPaths.cpp in Sources */,
 				CE9D80D020E3CA9200670C17 /* DirtyRect.cpp in Sources */,
 				CE9D80D120E3CA9200670C17 /* FileIO.cpp in Sources */,
+				A10000000000000000000012 /* TextWebSocket.cpp in Sources */,
 				CE9D80D220E3CA9200670C17 /* Unicode.cpp in Sources */,
 				CE9D80D320E3CA9200670C17 /* slre.c in Sources */,
 			);
@@ -2492,6 +2501,7 @@
 				CEE126CD20E374BD00C286AF /* DirPaths.cpp in Sources */,
 				CEE126CE20E374BD00C286AF /* DirtyRect.cpp in Sources */,
 				CEE126CF20E374BD00C286AF /* FileIO.cpp in Sources */,
+				A10000000000000000000013 /* TextWebSocket.cpp in Sources */,
 				CEE126D020E374BD00C286AF /* Unicode.cpp in Sources */,
 				CEE126D120E374BD00C286AF /* slre.c in Sources */,
 			);

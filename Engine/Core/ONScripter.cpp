@@ -8,6 +8,7 @@
  */
 
 #include "Engine/Core/ONScripter.hpp"
+#include "Support/TextWebSocket.hpp"
 #include "Engine/Components/Async.hpp"
 #include "Engine/Components/Joystick.hpp"
 #include "Engine/Components/Fonts.hpp"
@@ -1027,6 +1028,34 @@ int ONScripter::ownInit() {
 
 	initSDL();
 
+#if !defined(IOS) && !defined(DROID)
+	auto textWebSocket = ons_cfg_options.find("text-websocket");
+	if (textWebSocket != ons_cfg_options.end()) {
+		const std::string &endpoint = textWebSocket->second;
+		std::string host;
+		std::string portString;
+		if (!endpoint.empty() && endpoint.front() == '[') {
+			auto bracket = endpoint.find(']');
+			if (bracket != std::string::npos && bracket > 1 && bracket + 1 < endpoint.size() && endpoint[bracket + 1] == ':') {
+				host       = endpoint.substr(1, bracket - 1);
+				portString = endpoint.substr(bracket + 2);
+			}
+		} else {
+			auto separator = endpoint.rfind(':');
+			if (separator != std::string::npos && separator > 0 && endpoint.find(':') == separator) {
+				host       = endpoint.substr(0, separator);
+				portString = endpoint.substr(separator + 1);
+			}
+		}
+		char *end = nullptr;
+		long port = std::strtol(portString.c_str(), &end, 10);
+		if (host.empty() || portString.empty() || !end || *end != '\0' || port < 1 || port > 65535)
+			errorAndExit("Invalid text-websocket address; expected HOST:PORT");
+		if (!textWebSocketServer.start(host, static_cast<uint16_t>(port)))
+			errorAndExit("Unable to start the text WebSocket server");
+	}
+#endif
+
 	pixel_format_enum_32bpp = SDL_MasksToPixelFormatEnum(32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000); // RGBA
 	pixel_format_enum_24bpp = SDL_MasksToPixelFormatEnum(24, 0x0000ff, 0x00ff00, 0xff0000, 0);                // RGB
 
@@ -1121,6 +1150,9 @@ int ONScripter::ownInit() {
 }
 
 int ONScripter::ownDeinit() {
+#if !defined(IOS) && !defined(DROID)
+	textWebSocketServer.stop();
+#endif
 	reset();
 
 	delete[] sprite_info;

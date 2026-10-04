@@ -832,6 +832,7 @@ HEADERS=(
   'Support/Droid/hidapi.hpp'
   'Support/FileDefs.hpp'
   'Support/FileIO.hpp'
+  'Support/TextWebSocket.hpp'
   'Support/KeyState.hpp'
   'Support/Unicode.hpp'
   'External/Compatibility.hpp'
@@ -844,6 +845,10 @@ if [ "$SYS" == "Droid" ]; then
   SOURCES+=('Support/Droid/DroidProfile.cpp' 'Support/Droid/hid.cpp')
 elif [ "$SYS" == "MinGW" ]; then
   SOURCES+=('Resources/Support/WinRes.rc.in')
+fi
+
+if [ "$SYS" != "Droid" ]; then
+  SOURCES+=('Support/TextWebSocket.cpp')
 fi
 
 OBJECTS="ONSCRIPTER_OBJS ="
