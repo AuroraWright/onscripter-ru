@@ -61,6 +61,8 @@ build() {
 
     case $(getTarget) in
         win32)
+            # The GLES stubs rely on the pre-GCC 10 common-symbol behaviour.
+            lcf="$lcf -fcommon"
             if $CROSS_BUILD; then
                 cmake -G "Unix Makefiles" -DCMAKE_SYSTEM_NAME=Windows -DSDL_gpu_USE_SYSTEM_EPOXY=ON -DSDL_gpu_DISABLE_GLES=OFF -DSDL_gpu_DISABLE_GLES_1=ON -DSDL_gpu_DYNAMIC_GLES_2=ON -DSDL_gpu_DYNAMIC_GLES_3=ON -DCMAKE_C_FLAGS="$lcf" -DCMAKE_CXX_FLAGS="$lcxf" &>"$logfile" || ret=$?
             else

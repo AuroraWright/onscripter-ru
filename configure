@@ -645,7 +645,7 @@ genlink freetype
 genlink harfbuzz
 
 if [ "$SYS" == "Droid" ]; then
-  if [ "$ARCH" == "aarch64" ]; then
+  if [ "$ARCH" == "arm64" ]; then
     genlink unwind -aarch64
     LINKunwindArch="$LINKunwind"
     genlink unwind

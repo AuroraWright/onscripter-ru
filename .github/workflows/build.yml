@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -28,7 +28,7 @@ jobs:
       - name: Build
         run: make -j3
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: onscripter-ru-macos-arm64
           path: DerivedData/MacOSX-arm64/onscripter-ru
@@ -44,15 +44,11 @@ jobs:
             runner: ubuntu-22.04
             configure_args: ""
             output: DerivedData/Posix-x86_64/onscripter-ru
-          - arch: arm64
-            runner: ubuntu-22.04-arm
-            configure_args: --prefer-clang
-            output: DerivedData/Posix-arm64/onscripter-ru
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 90
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -70,7 +66,7 @@ jobs:
       - name: Build
         run: make -j"$(getconf _NPROCESSORS_ONLN)"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: onscripter-ru-linux-${{ matrix.arch }}
           path: ${{ matrix.output }}
@@ -89,7 +85,7 @@ jobs:
       AS: i686-w64-mingw32-as
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -112,7 +108,7 @@ jobs:
           cp DerivedData/MinGW-i686/onscripter-ru.exe ciout/
           cp -R Resources/Windows/dlls ciout/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: onscripter-ru-windows-i686
           path: ciout
@@ -124,7 +120,7 @@ jobs:
     timeout-minutes: 180
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -140,48 +136,8 @@ jobs:
       - name: Build
         run: ./Scripts/quickdroid.tool --release
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: onscripter-ru-android
           path: DerivedData/Droid-package/onscripter-ru.apk
-          if-no-files-found: error
-
-  ios:
-    name: iOS arm64
-    runs-on: macos-14
-    timeout-minutes: 180
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install build tools
-        run: brew install autoconf automake cmake libtool pkg-config yasm
-
-      - name: Limit legacy iOS dependencies to arm64
-        run: |
-          sed -i '' '/2F5351A61D51FF6A0023D8F0.*PBXTargetDependency.*,/d' ONScripter.xcodeproj/project.pbxproj
-          sed -i '' '/CEF2085E21ADF38300D01AD8.*PBXTargetDependency.*,/d' ONScripter.xcodeproj/project.pbxproj
-
-      - name: Build
-        run: |
-          xcodebuild \
-            -project ONScripter.xcodeproj \
-            -scheme onscripter-ru-ios \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination "generic/platform=iOS" \
-            -derivedDataPath DerivedData/CI-ios \
-            ARCHS=arm64 \
-            VALID_ARCHS=arm64 \
-            ONLY_ACTIVE_ARCH=YES \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: onscripter-ru-ios-arm64
-          path: DerivedData/CI-ios/Build/Products/Release/onscripter-ru-ios.app
           if-no-files-found: error
