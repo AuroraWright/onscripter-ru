@@ -75,7 +75,7 @@ if [ -f "$WORK/onscripter-ru" ]; then
     echo "Found armeabi-v7a engine, copying..."
     mkdir -p "$PKGPATH/lib/armeabi-v7a" || exit 1
     cp "$WORK/onscripter-ru" "$PKGPATH/lib/armeabi-v7a/libmain.so" || exit 1
-  elif [ "$ARCH" == "Droid-aarch64" ]; then
+  elif [ "$ARCH" == "Droid-arm64" ]; then
     echo "Found arm64-v8a engine, copying..."
     mkdir -p "$PKGPATH/lib/arm64-v8a" || exit 1
     cp "$WORK/onscripter-ru" "$PKGPATH/lib/arm64-v8a/libmain.so" || exit 1
@@ -96,10 +96,10 @@ else
     cp "$WORK/Droid-arm/onscripter-ru" "$PKGPATH/lib/armeabi-v7a/libmain.so" || exit 1
     COPIED=true
   fi
-  if [ -f "$WORK/Droid-aarch64/onscripter-ru" ]; then
+  if [ -f "$WORK/Droid-arm64/onscripter-ru" ]; then
     echo "Found arm64-v8a engine, copying..."
     mkdir -p "$PKGPATH/lib/arm64-v8a" || exit 1
-    cp "$WORK/Droid-aarch64/onscripter-ru" "$PKGPATH/lib/arm64-v8a/libmain.so" || exit 1
+    cp "$WORK/Droid-arm64/onscripter-ru" "$PKGPATH/lib/arm64-v8a/libmain.so" || exit 1
     COPIED=true
   fi
   if [ -f "$WORK/Droid-i386/onscripter-ru" ]; then

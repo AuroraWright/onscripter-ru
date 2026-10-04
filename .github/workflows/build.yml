@@ -134,7 +134,13 @@ jobs:
             subversion unzip wget yasm zip
 
       - name: Build
-        run: ./Scripts/quickdroid.tool --release
+        run: |
+          for arch in arm arm64; do
+            ./configure --std=c++17 --droid-build --droid-arch="$arch" --release-build --strip-binary
+            make clean
+            make
+          done
+          make apkall
 
       - uses: actions/upload-artifact@v7
         with:
