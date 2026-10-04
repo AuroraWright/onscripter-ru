@@ -147,3 +147,63 @@ jobs:
           name: onscripter-ru-android
           path: DerivedData/Droid-package/onscripter-ru.apk
           if-no-files-found: error
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - macos
+      - linux
+      - windows
+      - android
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Package release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_safe=${GITHUB_REF_NAME//\//-}
+          mkdir -p release
+
+          chmod +x artifacts/onscripter-ru-macos-arm64/onscripter-ru
+          tar -C artifacts/onscripter-ru-macos-arm64 -czf \
+            "release/onscripter-ru-${tag_safe}-macos-arm64.tar.gz" \
+            onscripter-ru
+
+          chmod +x artifacts/onscripter-ru-linux-x86_64/onscripter-ru
+          tar -C artifacts/onscripter-ru-linux-x86_64 -czf \
+            "release/onscripter-ru-${tag_safe}-linux-x86_64.tar.gz" \
+            onscripter-ru
+
+          (
+            cd artifacts/onscripter-ru-windows-i686
+            zip -qr "../../release/onscripter-ru-${tag_safe}-windows-i686.zip" .
+          )
+
+          cp artifacts/onscripter-ru-android/onscripter-ru.apk \
+            "release/onscripter-ru-${tag_safe}-android.apk"
+
+          cd release
+          sha256sum onscripter-ru-* > SHA256SUMS
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" release/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" release/* \
+              --verify-tag \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes
+          fi
