@@ -221,6 +221,15 @@ void ONScripter::setupAnimationInfo(AnimationInfo *anim, Fontinfo *info) {
 
 			if (i == 0) {
 				dlgCtrl.prepareForRendering(anim->file_name, f_info, state, w, h);
+				float offsetX = -state.offset.x;
+				float offsetY = -state.offset.y;
+				if (anim->image_position_offset.x != 0 || anim->image_position_offset.y != 0 || offsetX != 0 || offsetY != 0) {
+					// Keep the base text at its requested coordinates while allowing ruby
+					// to occupy space left/above that origin.
+					anim->image_position_offset.x = offsetX;
+					anim->image_position_offset.y = offsetY;
+					UpdateAnimPosXY(anim);
+				}
 				if (w == 0 || h == 0)
 					break;
 

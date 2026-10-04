@@ -185,6 +185,7 @@ public:
 
 	GPU_Rect orig_pos{0, 0, 0, 0}; //Mion: position and size of the image before resizing
 	GPU_Rect pos{0, 0, 0, 0};      // position and size of the current cell
+	float2 image_position_offset{0, 0}; // generated image content outside its logical script position
 	GPU_Rect scrollable{0, 0, 0, 0};
 
 	SpriteIdentifier parentImage;

@@ -650,7 +650,7 @@ void DialogueController::getRenderingBounds(TextRenderingState &state, bool visi
 	for (auto &seg : state.segments) {
 		if (visiblePiecesOnly && &state == &dialogueRenderState && i > state.segmentIndex)
 			continue;
-		for (auto piecePtr : seg.getPieces()) {
+		for (auto piecePtr : seg.getPieces(true)) {
 			DialoguePiece &piece = *piecePtr;
 			if (visiblePiecesOnly) {
 				if (piece.charRenderBuffer.empty())
@@ -728,8 +728,17 @@ void DialogueController::prepareForRendering(const char *buf, Fontinfo &f_info, 
 	layoutLines(state);
 	getRenderingBounds(state);
 
-	w = state.bounds.w + state.bounds.x;
-	h = state.bounds.h + state.bounds.y;
+	if (state.getPieces(true).size() != state.getPieces().size()) {
+		// Ruby can be wider than the text it annotates and therefore extend past the
+		// logical text origin. Keep that overhang inside the generated texture.
+		state.offset.x = -std::min(state.bounds.x, 0.0f);
+		state.offset.y = -std::min(state.bounds.y, 0.0f);
+		w              = std::ceil(state.bounds.w + std::max(state.bounds.x, 0.0f));
+		h              = std::ceil(state.bounds.h + std::max(state.bounds.y, 0.0f));
+	} else {
+		w = state.bounds.w + state.bounds.x;
+		h = state.bounds.h + state.bounds.y;
+	}
 }
 
 void DialogueController::layoutSegment(TextRenderingState &state, std::u16string text, Fontinfo &fi) {

@@ -706,8 +706,8 @@ private:
 	bool show_fps_counter{false};
 
 	void UpdateAnimPosXY(AnimationInfo *animp) {
-		animp->pos.x = animp->orig_pos.x;
-		animp->pos.y = animp->orig_pos.y;
+		animp->pos.x = animp->orig_pos.x + animp->image_position_offset.x;
+		animp->pos.y = animp->orig_pos.y + animp->image_position_offset.y;
 	}
 	void UpdateAnimPosWH(AnimationInfo *animp) {
 		animp->pos.w = animp->orig_pos.w;

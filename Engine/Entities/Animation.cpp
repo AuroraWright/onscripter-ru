@@ -47,6 +47,7 @@ void AnimationInfo::performCopyNonImageFields(const AnimationInfo &o) {
 
 	orig_pos   = o.orig_pos;
 	pos        = o.pos;
+	image_position_offset = o.image_position_offset;
 	scrollable = o.scrollable;
 
 	has_z_order_override = o.has_z_order_override;
@@ -228,6 +229,7 @@ void AnimationInfo::removeNonImageFields() {
 	orig_pos.w = orig_pos.h = 0;
 	pos.x = pos.y = 0;
 	pos.w = pos.h   = 0;
+	image_position_offset = {0, 0};
 	bounding_rect.x = bounding_rect.y = 0;
 	bounding_rect.w = bounding_rect.h = 0;
 	visible                           = false;
