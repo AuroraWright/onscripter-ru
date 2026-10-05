@@ -156,6 +156,9 @@ jobs:
   release:
     name: Publish release
     if: github.event_name == 'workflow_dispatch'
+    concurrency:
+      group: release-${{ github.repository }}-${{ inputs.tag }}
+      cancel-in-progress: false
     needs:
       - macos
       - linux
@@ -169,6 +172,11 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: bash Scripts/validate_release_tag.sh "$RELEASE_TAG" "$GITHUB_SHA"
 
       - uses: actions/download-artifact@v7
         with:
@@ -212,6 +220,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          bash Scripts/validate_release_tag.sh "$RELEASE_TAG" "$GITHUB_SHA"
           if gh release view "$RELEASE_TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" release/* --clobber --repo "$GH_REPO"
           else

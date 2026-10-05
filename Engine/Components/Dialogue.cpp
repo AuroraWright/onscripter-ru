@@ -57,20 +57,29 @@ int DialogueController::ownInit() {
 int DialogueController::ownDeinit() {
 	// Clean the images in the dialogue controller
 	setDialogueActive(false);
-	nextTextForWebSocket = false;
+	clearWebSocketTextSelection();
 
 	return 0;
 }
 
 void DialogueController::markNextTextForWebSocket() {
-	nextTextForWebSocket = true;
+	webSocketTextSelection.mark(ons.callStack.size());
 }
 
-bool DialogueController::consumeNextTextForWebSocket() {
-	if (!nextTextForWebSocket)
-		return false;
-	nextTextForWebSocket = false;
-	return true;
+void DialogueController::clearWebSocketTextSelection() {
+	webSocketTextSelection.clear();
+}
+
+bool DialogueController::webSocketTextRequested() const {
+	return webSocketTextSelection.requested();
+}
+
+TextStreamSelection::Scope DialogueController::scopeWebSocketText(const char *command) {
+	return TextStreamSelection::Scope(webSocketTextSelection, command, ons.callStack.size());
+}
+
+bool DialogueController::consumeNextTextForWebSocket(bool sprite) {
+	return webSocketTextSelection.consume(sprite);
 }
 
 // ----------------------- functions related to processing, parsing, execution -----------------------------
@@ -674,7 +683,7 @@ void DialogueController::layoutLines(TextRenderingState &state) {
 	}
 }
 
-void DialogueController::getRenderingBounds(TextRenderingState &state, bool visiblePiecesOnly) {
+void DialogueController::getRenderingBounds(TextRenderingState &state, bool visiblePiecesOnly, bool includeRuby) {
 	// find maximum limits over all pieces
 	// If we have a centred piece on a 1920 target, which is 500 px wide, we will use a
 	// (1920-500)/2 + 500 = 1210 px wide image.
@@ -688,7 +697,7 @@ void DialogueController::getRenderingBounds(TextRenderingState &state, bool visi
 	for (auto &seg : state.segments) {
 		if (visiblePiecesOnly && &state == &dialogueRenderState && i > state.segmentIndex)
 			continue;
-		for (auto piecePtr : seg.getPieces(true)) {
+		for (auto piecePtr : seg.getPieces(includeRuby)) {
 			DialoguePiece &piece = *piecePtr;
 			if (visiblePiecesOnly) {
 				if (piece.charRenderBuffer.empty())
@@ -744,7 +753,7 @@ void DialogueController::renderToTarget(GPU_Target *dst, GPU_Rect *dstClip, std:
 	layoutLines(state);
 	if (dst) {
 #if !defined(IOS) && !defined(DROID)
-		if (consumeNextTextForWebSocket())
+		if (consumeNextTextForWebSocket(false))
 			textWebSocketServer.broadcast(renderedText(state));
 #endif
 		// Finally, the characters are rendered in the positions they were layouted to.
@@ -756,8 +765,12 @@ void DialogueController::renderToTarget(GPU_Target *dst, GPU_Rect *dstClip, std:
 	state.clear();
 }
 
-void DialogueController::prepareForRendering(const char *buf, Fontinfo &f_info, TextRenderingState &state, uint16_t &w, uint16_t &h) {
+void DialogueController::prepareForRendering(const char *buf, Fontinfo &f_info, TextRenderingState &state, uint16_t &w, uint16_t &h, float2 &logicalSize) {
 	w = h = 0; // Nothing by default
+	logicalSize = {0, 0};
+#if !defined(IOS) && !defined(DROID)
+	bool streamText = consumeNextTextForWebSocket();
+#endif
 	std::u16string text;
 	decodeUTF8String(buf, text);
 	//sendToLog(LogLevel::Info, "Rendering LSP to new image: %s\n", decodeUTF16String(resultStr).c_str());
@@ -768,9 +781,12 @@ void DialogueController::prepareForRendering(const char *buf, Fontinfo &f_info, 
 		return; // >D
 
 	layoutLines(state);
+	getRenderingBounds(state, false, false);
+	logicalSize = {static_cast<float>(static_cast<uint16_t>(state.bounds.w + state.bounds.x)),
+	               static_cast<float>(static_cast<uint16_t>(state.bounds.h + state.bounds.y))};
 	getRenderingBounds(state);
 #if !defined(IOS) && !defined(DROID)
-	if (consumeNextTextForWebSocket())
+	if (streamText)
 		textWebSocketServer.broadcast(renderedText(state));
 #endif
 

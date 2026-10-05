@@ -11,6 +11,7 @@
 #include "Engine/Graphics/GPU.hpp"
 #include "Engine/Graphics/Common.hpp"
 #include "Engine/Core/ONScripter.hpp"
+#include "Support/WindowGeometry.hpp"
 
 #include <SDL2/SDL.h>
 #ifdef WIN32
@@ -271,6 +272,13 @@ bool WindowController::changeMode(bool perform, bool correct, int mode) {
 	// 3) Enter fullscreen mode.
 	// Window positioning and mouse remaps are done in a manual manner here.
 
+	if (perform && mode == 0 && fullscreen_mode) {
+		int mouse_x, mouse_y;
+		SDL_GetMouseState(&mouse_x, &mouse_y);
+		windowed_mouse_position.x = fullscreenToWindowedCoordinate(mouse_x, screen_width, windowed_screen_width, script_width, fullscript_offset_x);
+		windowed_mouse_position.y = fullscreenToWindowedCoordinate(mouse_y, screen_height, windowed_screen_height, script_height, fullscript_offset_y);
+	}
+
 	if (!updateDisplayData() && mode > 0) {
 		// Request to enter fullscreen when we are in fullscreen-banned mode. Deny it
 		return false;
@@ -333,8 +341,8 @@ bool WindowController::changeMode(bool perform, bool correct, int mode) {
 			SDL_GetMouseState(&mouse_x, &mouse_y);
 			//We need to correct a shifted mouse
 			//sendToLog(LogLevel::Info, "Going to windowed. Before: %u, %u\n", mouse_x, mouse_y);
-			mouse_x = ((mouse_x - (screen_width / static_cast<float>(script_width)) * fullscript_offset_x) * windowed_screen_width / fullscreen_width);
-			mouse_y = ((mouse_y - (screen_height / static_cast<float>(script_height)) * fullscript_offset_y) * windowed_screen_height / fullscreen_height);
+			mouse_x = windowed_mouse_position.x;
+			mouse_y = windowed_mouse_position.y;
 			//sendToLog(LogLevel::Info, "Going to windowed. After: %u, %u\n", mouse_x, mouse_y);
 
 			GPU_SetWindowResolution(screen_width, screen_height);

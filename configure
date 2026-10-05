@@ -833,6 +833,8 @@ HEADERS=(
   'Support/FileDefs.hpp'
   'Support/FileIO.hpp'
   'Support/TextWebSocket.hpp'
+  'Support/TextStreamSelection.hpp'
+  'Support/TextImageGeometry.hpp'
   'Support/KeyState.hpp'
   'Support/Unicode.hpp'
   'External/Compatibility.hpp'

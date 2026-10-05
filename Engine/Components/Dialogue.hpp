@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "Support/TextStreamSelection.hpp"
+
 #include "External/Compatibility.hpp"
 #include "External/LimitedQueue.hpp"
 #include "External/slre.h"
@@ -350,13 +352,16 @@ public:
 	void layoutName();
 	void layoutDialogue();
 	void markNextTextForWebSocket();
+	void clearWebSocketTextSelection();
+	bool webSocketTextRequested() const;
+	TextStreamSelection::Scope scopeWebSocketText(const char *command);
 	// for specialscrollable rendering
 	void renderToTarget(GPU_Target *dst, GPU_Rect *dstClip, char *buf, Fontinfo *f_info = nullptr, bool paddingShift = true, int tightlyFit = FIT_MODE::FIT_BOTH);
 	void renderToTarget(GPU_Target *dst, GPU_Rect *dstClip, std::u16string &text, Fontinfo *f_info = nullptr, bool paddingShift = true, int tightlyFit = FIT_MODE::FIT_BOTH);
 	// for lsp drawing (returns image size and decoded text)
-	void prepareForRendering(const char *buf, Fontinfo &f_info, TextRenderingState &state, uint16_t &w, uint16_t &h);
+	void prepareForRendering(const char *buf, Fontinfo &f_info, TextRenderingState &state, uint16_t &w, uint16_t &h, float2 &logicalSize);
 
-	void getRenderingBounds(TextRenderingState &state, bool visiblePiecesOnly = false);
+	void getRenderingBounds(TextRenderingState &state, bool visiblePiecesOnly = false, bool includeRuby = true);
 
 	// State related variables
 	const char *dialogue_pos{nullptr};
@@ -382,9 +387,9 @@ public:
 
 private:
 	char *endOfCommand{nullptr};
-	bool nextTextForWebSocket{false};
+	TextStreamSelection webSocketTextSelection;
 
-	bool consumeNextTextForWebSocket();
+	bool consumeNextTextForWebSocket(bool sprite = true);
 
 	void layoutSegment(TextRenderingState &state, std::u16string text, Fontinfo &fi);
 	DialoguePiece layoutPiece(TextRenderingState &state, std::u16string &text, Fontinfo &fontInfo, std::deque<DialoguePiece> *rubyPieces);

@@ -13,6 +13,7 @@
 #include <string>
 
 class TextWebSocketServer {
+	friend struct TextWebSocketServerTests;
 	struct Implementation;
 	Implementation *implementation{nullptr};
 

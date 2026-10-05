@@ -164,12 +164,7 @@ while getopts O:defphilm:a:o:r:b:c:g: o; do
             fi;;
         m)
             MMAC_VER_MIN="$OPTARG"
-            MAC_MIN_MAJOR="${MMAC_VER_MIN%%.*}"
-            if [ "$MAC_MIN_MAJOR" -ge 11 ]; then
-                MAC_MIN_VER="${MMAC_VER_MIN//./}000"
-            else
-                MAC_MIN_VER="${MMAC_VER_MIN//./}0"
-            fi
+            MAC_MIN_VER=$(mac_deployment_version "$MMAC_VER_MIN") || error_out "Invalid macOS deployment version: %s" "$MMAC_VER_MIN"
             MIOS_VER_MIN="$OPTARG"
             IOS_MIN_VER="${MIOS_VER_MIN//./}0" ;;
         a)

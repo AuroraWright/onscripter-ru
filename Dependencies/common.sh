@@ -76,10 +76,27 @@ trim() {
     echo -n "$var"
 }
 
+# Availability macros use the legacy encoding before macOS 10.10.
+
+mac_deployment_version() {
+    if [[ ! "$1" =~ ^([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$ ]]; then
+        return 1
+    fi
+    local major=$((10#${BASH_REMATCH[1]}))
+    local minor=$((10#${BASH_REMATCH[3]:-0}))
+    local patch=$((10#${BASH_REMATCH[5]:-0}))
+    if (( minor > 99 || patch > 99 )); then
+        return 1
+    fi
+    if (( major >= 11 || (major == 10 && minor >= 10) )); then
+        echo "$((major * 10000 + minor * 100 + patch))"
+    else
+        echo "$((major * 100 + minor * 10 + patch))"
+    fi
+}
+
 # Portable replacement for !
 
 not() {
     if $1; then false; else true; fi
 }
-
-

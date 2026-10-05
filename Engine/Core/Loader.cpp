@@ -505,6 +505,10 @@ static void parseOptions(int argc, char **argv, bool &hasArchivePath) {
 				ons.ons_cfg_options["system-offset-y"] = argv[0];
 #if !defined(IOS) && !defined(DROID)
 			} else if (!std::strcmp(argv[0] + 1, "-text-websocket")) {
+				if (argc <= 2 || !argv[1] || argv[1][0] == '-') {
+					ons.errorAndExit("--text-websocket requires a HOST:PORT argument", nullptr, "Command-Line Issue", true);
+					return;
+				}
 				argc--;
 				argv++;
 				ons.ons_cfg_options["text-websocket"] = argv[0];

@@ -12,6 +12,7 @@
 #include "Engine/Components/Window.hpp"
 #include "Engine/Graphics/GPU.hpp"
 #include "Support/FileIO.hpp"
+#include "Support/TextImageGeometry.hpp"
 
 #include <unistd.h>
 
@@ -170,7 +171,15 @@ void ONScripter::advanceSpecificAIclocks(uint64_t ns, int i, int type, bool old_
 }
 
 void ONScripter::setupAnimationInfo(AnimationInfo *anim, Fontinfo *info) {
-	if (anim->gpu_image && !anim->stale_image) {
+	if (anim->trans_mode != AnimationInfo::TRANS_STRING &&
+	    (anim->image_position_offset.x != 0 || anim->image_position_offset.y != 0 ||
+	     anim->image_size_extension.x != 0 || anim->image_size_extension.y != 0)) {
+		anim->image_position_offset = {0, 0};
+		anim->image_size_extension = {0, 0};
+		UpdateAnimPosXY(anim);
+	}
+	if (anim->gpu_image && !anim->stale_image &&
+	    !(anim->trans_mode == AnimationInfo::TRANS_STRING && dlgCtrl.webSocketTextRequested())) {
 		anim->exists = true;
 		return;
 	}
@@ -220,10 +229,13 @@ void ONScripter::setupAnimationInfo(AnimationInfo *anim, Fontinfo *info) {
 			//TODO: anim->skip_whitespace?
 
 			if (i == 0) {
-				dlgCtrl.prepareForRendering(anim->file_name, f_info, state, w, h);
+				float2 logicalSize;
+				dlgCtrl.prepareForRendering(anim->file_name, f_info, state, w, h, logicalSize);
+				anim->image_size_extension = {w - logicalSize.x, h - logicalSize.y};
 				float offsetX = -state.offset.x;
 				float offsetY = -state.offset.y;
-				if (anim->image_position_offset.x != 0 || anim->image_position_offset.y != 0 || offsetX != 0 || offsetY != 0) {
+				if (anim->image_position_offset.x != 0 || anim->image_position_offset.y != 0 || offsetX != 0 || offsetY != 0 ||
+				    (anim->type == SPRITE_LSP2 && (anim->image_size_extension.x != 0 || anim->image_size_extension.y != 0))) {
 					// Keep the base text at its requested coordinates while allowing ruby
 					// to occupy space left/above that origin.
 					anim->image_position_offset.x = offsetX;
@@ -1208,8 +1220,12 @@ void ONScripter::drawToGPUTarget(GPU_Target *target, AnimationInfo *info, int re
 	bool opacityTransform = info->darkenHue.r < 255 || info->darkenHue.g < 255 ||
 	                        info->darkenHue.b < 255 || info->trans < 255;
 
-	float coord_x = info->rot == 0 && !info->has_hotspot ? info->pos.x : info->rendering_center.x;
-	float coord_y = info->rot == 0 && !info->has_hotspot ? info->pos.y : info->rendering_center.y;
+	bool paddedAffine = info->type == SPRITE_LSP2 &&
+	                    (info->image_position_offset.x != 0 || info->image_position_offset.y != 0 ||
+	                     info->image_size_extension.x != 0 || info->image_size_extension.y != 0);
+	bool computedCenter = useComputedImageCenter(info->rot, info->has_hotspot, info->has_scale_center, paddedAffine);
+	float coord_x = computedCenter ? info->rendering_center.x : info->pos.x;
+	float coord_y = computedCenter ? info->rendering_center.y : info->pos.y;
 
 	// Adjust by sprite-specific camera
 	coord_x += info->camera.pos.x;

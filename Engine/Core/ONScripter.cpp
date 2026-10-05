@@ -1270,6 +1270,7 @@ void ONScripter::resetSub() {
 		loadBreakupCellforms();
 
 	// reset dialogue controller
+	dlgCtrl.clearWebSocketTextSelection();
 	dlgCtrl.setDialogueActive(false);
 
 	if (initialised() && async.initialised()) {
@@ -1918,6 +1919,7 @@ void ONScripter::executeLabel() {
 				}*/
 
 				// count script execution time
+				auto webSocketScope = dlgCtrl.scopeWebSocketText(script_h.getStringBuffer());
 				auto start = SDL_GetPerformanceCounter();
 				ret        = ScriptParser::parseLine();
 				if (ret == RET_NOMATCH)
@@ -2028,6 +2030,7 @@ bool ONScripter::scriptExecutionPermitted() {
 void ONScripter::runScript() {
 	readToken();
 
+	auto webSocketScope = dlgCtrl.scopeWebSocketText(script_h.getStringBuffer());
 	int ret = ScriptParser::parseLine();
 	if (ret == RET_NOMATCH)
 		this->parseLine();
