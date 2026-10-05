@@ -790,17 +790,21 @@ void DialogueController::prepareForRendering(const char *buf, Fontinfo &f_info, 
 		textWebSocketServer.broadcast(renderedText(state));
 #endif
 
-	if (state.getPieces(true).size() != state.getPieces().size()) {
-		// Ruby can be wider than the text it annotates and therefore extend past the
-		// logical text origin. Keep that overhang inside the generated texture.
-		state.offset.x = -std::min(state.bounds.x, 0.0f);
-		state.offset.y = -std::min(state.bounds.y, 0.0f);
-		w              = std::ceil(state.bounds.w + std::max(state.bounds.x, 0.0f));
-		h              = std::ceil(state.bounds.h + std::max(state.bounds.y, 0.0f));
-	} else {
-		w = state.bounds.w + state.bounds.x;
-		h = state.bounds.h + state.bounds.y;
+	// Keep layout dimensions separate from the pixels needed for outlines, shadows and ruby.
+	GPU_Rect renderedBounds{0, 0, logicalSize.x, logicalSize.y};
+	for (auto piece : state.getPieces(true)) {
+		for (bool shadow : {false, true})
+			for (bool border : {false, true})
+				renderAddedChars(state, *piece, border, shadow, &renderedBounds);
 	}
+	state.offset.x = -std::floor(std::min(renderedBounds.x, 0.0f));
+	state.offset.y = -std::floor(std::min(renderedBounds.y, 0.0f));
+	float width = std::ceil(renderedBounds.x + renderedBounds.w + state.offset.x);
+	float height = std::ceil(renderedBounds.y + renderedBounds.h + state.offset.y);
+	if (width > UINT16_MAX || height > UINT16_MAX)
+		ons.errorAndExit("Text sprite exceeds the supported image dimensions");
+	w = width;
+	h = height;
 }
 
 void DialogueController::layoutSegment(TextRenderingState &state, std::u16string text, Fontinfo &fi) {
@@ -1403,7 +1407,7 @@ void DialogueController::addCharToRenderBuffer(DialoguePiece &piece, char16_t co
 	fontInfo.layoutData.prevCharIndex          = glyph->ftCharIndexCache;
 }
 
-void DialogueController::renderAddedChars(TextRenderingState &state, DialoguePiece &p, bool renderBorder, bool renderShadow) {
+void DialogueController::renderAddedChars(TextRenderingState &state, DialoguePiece &p, bool renderBorder, bool renderShadow, GPU_Rect *renderedBounds) {
 	float x         = 0;
 	auto fiIterator = p.fontInfos.begin();
 
@@ -1445,10 +1449,32 @@ void DialogueController::renderAddedChars(TextRenderingState &state, DialoguePie
 			}
 			float blitx = x + glyph->minx + (renderBorder ? glyph->border_bitmap_offset.x : 0) + (renderShadow ? style.shadow_distance[0] : 0);
 			float blity = p.baseline - glyph->maxy - (renderBorder ? glyph->border_bitmap_offset.y : 0) + (renderShadow ? style.shadow_distance[1] : 0);
-			ons.renderGlyphValues(*glyph, state.dstClip, state.dst,
-			                      state.offset.x + p.position.x + p.horizontalResize * ((state.shiftSpriteDrawByBorderPadding ? p.borderPadding : 0) + blitx),
-			                      state.offset.y + p.position.y + (state.shiftSpriteDrawByBorderPadding ? p.borderPadding : 0) + blity,
-			                      p.horizontalResize, renderBorder, alpha);
+			float drawX = p.position.x + p.horizontalResize * ((state.shiftSpriteDrawByBorderPadding ? p.borderPadding : 0) + blitx);
+			float drawY = p.position.y + (state.shiftSpriteDrawByBorderPadding ? p.borderPadding : 0) + blity;
+			if (renderedBounds) {
+				auto &atlasRect = renderBorder ? glyph->border_pos : glyph->glyph_pos;
+				auto bitmap = renderBorder ? glyph->border_bitmap : glyph->bitmap;
+				if (bitmap && bitmap->w && bitmap->h) {
+					// Atlas glyphs start one pixel inside their source rectangles.
+					if (atlasRect.has()) {
+						drawX += p.horizontalResize;
+						drawY += 1;
+					}
+					float width = bitmap->w;
+					float height = bitmap->h;
+					float left = std::min(drawX, drawX + p.horizontalResize * width);
+					float right = std::max(drawX, drawX + p.horizontalResize * width);
+					float top = std::min(renderedBounds->y, drawY);
+					float bottom = std::max(renderedBounds->y + renderedBounds->h, drawY + height);
+					left = std::min(renderedBounds->x, left);
+					right = std::max(renderedBounds->x + renderedBounds->w, right);
+					*renderedBounds = GPU_Rect{left, top, right - left, bottom - top};
+				}
+			} else {
+				ons.renderGlyphValues(*glyph, state.dstClip, state.dst,
+				                      state.offset.x + drawX, state.offset.y + drawY,
+				                      p.horizontalResize, renderBorder, alpha);
+			}
 		}
 
 		x += r.layoutData.prevCharIndex ? fontInfo.my_font()->kerning(r.layoutData.prevCharIndex, glyph->ftCharIndexCache) : 0;

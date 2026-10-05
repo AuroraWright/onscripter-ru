@@ -2801,7 +2801,7 @@ int ONScripter::drawspCommand() {
 	GPU_Rect pos{si.current_cell * si.pos.w, 0, si.pos.w, si.pos.h};
 	if (alpha < 255)
 		GPU_SetRGBA(si.gpu_image, alpha, alpha, alpha, alpha);
-	gpu.copyGPUImage(si.gpu_image, &pos, nullptr, draw_gpu->target, x, y);
+	gpu.copyGPUImage(si.gpu_image, &pos, nullptr, draw_gpu->target, x + si.image_position_offset.x, y + si.image_position_offset.y);
 	si.setCell(old_cell_no);
 	if (alpha < 255)
 		GPU_SetRGBA(si.gpu_image, 255, 255, 255, 255);

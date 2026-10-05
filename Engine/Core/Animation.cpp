@@ -244,6 +244,9 @@ void ONScripter::setupAnimationInfo(AnimationInfo *anim, Fontinfo *info) {
 				}
 				if (w == 0 || h == 0)
 					break;
+				if (anim->num_of_cells <= 0 ||
+				    (anim->vertical_cells ? h : w) > UINT16_MAX / anim->num_of_cells)
+					errorAndExit("Text sprite cells exceed the supported image dimensions");
 
 				if (!anim->vertical_cells)
 					w *= anim->num_of_cells;
