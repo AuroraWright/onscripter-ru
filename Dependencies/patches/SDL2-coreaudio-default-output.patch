@@ -1,0 +1,43 @@
+--- a/src/audio/coreaudio/SDL_coreaudio.h
++++ b/src/audio/coreaudio/SDL_coreaudio.h
+@@ -56,6 +56,7 @@
+     SDL_AudioStream *capturestream;
+ #if MACOSX_COREAUDIO
+     AudioDeviceID deviceID;
++    SDL_bool defaultOutput;
+ #else
+     SDL_bool interrupted;
+     CFTypeRef interruption_listener;
+--- a/src/audio/coreaudio/SDL_coreaudio.m
++++ b/src/audio/coreaudio/SDL_coreaudio.m
+@@ -529,8 +529,10 @@
+ /* !!! FIXME: what does iOS do when a bluetooth audio device vanishes? Headphones unplugged? */
+ /* !!! FIXME: (we only do a "default" device on iOS right now...can we do more?) */
+ #if MACOSX_COREAUDIO
+     /* Fire a callback if the device stops being "alive" (disconnected, etc). */
+-    AudioObjectRemovePropertyListener(this->hidden->deviceID, &alive_address, device_unplugged, this);
++    if (!this->hidden->defaultOutput) {
++        AudioObjectRemovePropertyListener(this->hidden->deviceID, &alive_address, device_unplugged, this);
++    }
+ #endif
+ 
+ #if !MACOSX_COREAUDIO
+@@ -572,6 +574,8 @@
+         kAudioObjectPropertyElementMaster
+     };
+ 
++    this->hidden->defaultOutput = ((handle == NULL) && !iscapture);
++
+     if (handle == NULL) {
+         size = sizeof (AudioDeviceID);
+         addr.mSelector =
+@@ -632,7 +636,8 @@
+     }
+ 
+ #if MACOSX_COREAUDIO
+-{
++/* An unpinned playback queue follows the system default, including device removal. */
++if (!this->hidden->defaultOutput) {
+     const AudioObjectPropertyAddress prop = {
+         kAudioDevicePropertyDeviceUID,
+         iscapture ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput,
