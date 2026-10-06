@@ -5,7 +5,7 @@ history belongs in Git, issues, and release notes rather than this document.
 
 ## Supported release targets
 
-- Current release: 1.7 (`20261002-new`).
+- Current release: 1.7 hotfix (`20261006-new`).
 - Windows 10 or newer, x86-64, built in MSYS2 UCRT64.
 - Android 11 or newer (API 30), arm64. Exercised on 15 and 16; see the
   device-coverage note in `Resources/Docs/Android.md` for what the floor has and
