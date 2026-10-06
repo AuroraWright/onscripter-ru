@@ -785,8 +785,8 @@ private:
 	std::string discordPresenceApplicationId;
 
 	void UpdateAnimPosXY(AnimationInfo *animp) {
-		animp->pos.x = animp->orig_pos.x;
-		animp->pos.y = animp->orig_pos.y;
+		animp->pos.x = animp->orig_pos.x + (animp->type == SPRITE_LSP2 ? 0 : animp->image_position_offset.x);
+		animp->pos.y = animp->orig_pos.y + (animp->type == SPRITE_LSP2 ? 0 : animp->image_position_offset.y);
 	}
 	void UpdateAnimPosWH(AnimationInfo *animp) {
 		animp->pos.w = animp->orig_pos.w;

@@ -22,6 +22,7 @@
 #include <string>
 #include <sstream>
 #include <locale>
+#include <cmath>
 
 DialogueController dlgCtrl;
 
@@ -753,6 +754,7 @@ void DialogueController::renderToTarget(RenderTarget *dst, RenderRect *dstClip, 
 
 void DialogueController::prepareForRendering(const char *buf, Fontinfo &f_info, TextRenderingState &state, uint16_t &w, uint16_t &h) {
 	w = h = 0; // Nothing by default
+	state.logicalSize = {0, 0};
 	std::u16string text;
 	decodeUTF8String(buf, text);
 	//sendToLog(LogLevel::Info, "Rendering LSP to new image: %s\n", decodeUTF16String(resultStr).c_str());
@@ -776,8 +778,43 @@ void DialogueController::prepareForRendering(const char *buf, Fontinfo &f_info, 
 	layoutLines(state);
 	getRenderingBounds(state);
 
-	w = state.bounds.w + state.bounds.x;
-	h = state.bounds.h + state.bounds.y;
+	// Preserve script layout dimensions while including every pixel the renderer draws.
+	state.logicalSize = {std::floor(state.bounds.x + state.bounds.w),
+	                     std::floor(state.bounds.y + state.bounds.h)};
+	RenderRect renderedBounds{0, 0, state.logicalSize.x, state.logicalSize.y};
+	for (auto *piece : state.getPieces(true)) {
+		if (!piece->renderCommandsPrepared || piece->renderCommandGlyphCacheGeneration != ons.glyphCacheGeneration)
+			preparePieceRenderCommands(*piece);
+		const float padding = state.shiftSpriteDrawByBorderPadding ? piece->borderPadding : 0;
+		for (const auto &pass : piece->renderCommandPasses) {
+			for (const auto &command : pass) {
+				const auto &glyph = *command.glyph;
+				const auto *bitmap = command.renderBorder ? glyph.border_bitmap : glyph.bitmap;
+				if (!bitmap || bitmap->w == 0 || bitmap->h == 0)
+					continue;
+				float x = piece->position.x + piece->horizontalResize * (padding + command.x);
+				float y = piece->position.y + padding + command.y;
+				if ((command.renderBorder ? glyph.border_pos : glyph.glyph_pos).has()) {
+					// Atlas rectangles include a one-pixel transparent margin around the bitmap.
+					x += piece->horizontalResize;
+					y += 1;
+				}
+				const float right = x + piece->horizontalResize * bitmap->w;
+				const float left = std::min(renderedBounds.x, std::min(x, right));
+				const float top = std::min(renderedBounds.y, y);
+				const float bottom = std::max(renderedBounds.y + renderedBounds.h, y + bitmap->h);
+				renderedBounds = {left, top, std::max(renderedBounds.x + renderedBounds.w, std::max(x, right)) - left, bottom - top};
+			}
+		}
+	}
+	state.offset.x = -std::floor(std::min(renderedBounds.x, 0.0f));
+	state.offset.y = -std::floor(std::min(renderedBounds.y, 0.0f));
+	const float width = std::ceil(renderedBounds.x + renderedBounds.w + state.offset.x);
+	const float height = std::ceil(renderedBounds.y + renderedBounds.h + state.offset.y);
+	if (!std::isfinite(width) || !std::isfinite(height) || width < 0 || height < 0 || width > UINT16_MAX || height > UINT16_MAX)
+		ons.errorAndExit("Text sprite exceeds the supported image dimensions");
+	w = static_cast<uint16_t>(width);
+	h = static_cast<uint16_t>(height);
 }
 
 void DialogueController::layoutSegment(TextRenderingState &state, std::u16string text, Fontinfo &fi) {

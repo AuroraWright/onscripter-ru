@@ -165,7 +165,7 @@ public:
 		struct CachedText {
 			std::string key;
 			RenderImage *image{nullptr};
-			int padding{0};
+			float2 offset{0, 0};
 		};
 		std::vector<CachedText> textCache;
 		uint64_t textCacheTreeVersion = 0;
@@ -226,6 +226,8 @@ public:
 
 	RenderRect orig_pos{0, 0, 0, 0}; //Mion: position and size of the image before resizing
 	RenderRect pos{0, 0, 0, 0};      // position and size of the current cell
+	float2 image_position_offset{0, 0}; // rendered text overhang relative to its script position
+	float2 image_size_extension{0, 0};  // extra pixels beyond the logical text size, per cell
 	RenderRect scrollable{0, 0, 0, 0};
 
 	SpriteIdentifier parentImage;

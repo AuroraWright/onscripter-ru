@@ -47,6 +47,8 @@ void AnimationInfo::performCopyNonImageFields(const AnimationInfo &o) {
 
 	orig_pos   = o.orig_pos;
 	pos        = o.pos;
+	image_position_offset = o.image_position_offset;
+	image_size_extension = o.image_size_extension;
 	scrollable = o.scrollable;
 
 	has_z_order_override = o.has_z_order_override;
@@ -279,6 +281,8 @@ void AnimationInfo::removeNonImageFields() {
 	orig_pos.w = orig_pos.h = 0;
 	pos.x = pos.y = 0;
 	pos.w = pos.h   = 0;
+	image_position_offset = {0, 0};
+	image_size_extension = {0, 0};
 	bounding_rect.x = bounding_rect.y = 0;
 	bounding_rect.w = bounding_rect.h = 0;
 	visible                           = false;
@@ -463,6 +467,14 @@ void AnimationInfo::calcAffineMatrix(int script_width, int script_height) {
 		scale_center_offset_y -= hotspot.y - (pos.h / 2.0);
 	}
 
+	float image_offset_x = 0, image_offset_y = 0;
+	if (type == SPRITE_LSP2) {
+		const float x = image_position_offset.x + (has_hotspot ? 0 : image_size_extension.x / 2);
+		const float y = image_position_offset.y + (has_hotspot ? 0 : image_size_extension.y / 2);
+		image_offset_x = (mat[0][0] * x + mat[0][1] * y) / 1024;
+		image_offset_y = (mat[1][0] * x + mat[1][1] * y) / 1024;
+	}
+
 	// calculate bounding box
 	float min_xy[2] = {0, 0}, max_xy[2] = {0, 0};
 	for (int i = 0; i < 4; i++) {
@@ -478,8 +490,8 @@ void AnimationInfo::calcAffineMatrix(int script_width, int script_height) {
 			c_x = -c_x;
 		if (scale_y < 0)
 			c_y = -c_y;
-		corner_xy[i][0] = (mat[0][0] * c_x + mat[0][1] * c_y) / 1024 + pos.x - scale_center_offset_x;
-		corner_xy[i][1] = (mat[1][0] * c_x + mat[1][1] * c_y) / 1024 + pos.y - scale_center_offset_y;
+		corner_xy[i][0] = (mat[0][0] * c_x + mat[0][1] * c_y) / 1024 + pos.x - scale_center_offset_x + image_offset_x;
+		corner_xy[i][1] = (mat[1][0] * c_x + mat[1][1] * c_y) / 1024 + pos.y - scale_center_offset_y + image_offset_y;
 
 		if (has_hotspot) {
 			corner_xy[i][0] += (script_width / 2.0) - hotspot.x + (pos.w / 2.0);
@@ -504,6 +516,8 @@ void AnimationInfo::calcAffineMatrix(int script_width, int script_height) {
 	//Also compute rotated center
 	rendering_center.x = ((mat[0][0] * scale_center_offset_x + mat[0][1] * scale_center_offset_y) / 1024) + pos.x - scale_center_offset_x + (has_hotspot ? (script_width / 2.0) + (pos.w / 2.0) - hotspot.x : 0);
 	rendering_center.y = ((mat[1][0] * scale_center_offset_x + mat[1][1] * scale_center_offset_y) / 1024) + pos.y - scale_center_offset_y + (has_hotspot ? (script_height) + (pos.h / 2.0) - hotspot.y : 0);
+	rendering_center.x += image_offset_x;
+	rendering_center.y += image_offset_y;
 }
 
 void AnimationInfo::calculateImage(int w, int h) {

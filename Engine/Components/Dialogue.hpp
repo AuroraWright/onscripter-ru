@@ -245,6 +245,7 @@ struct TextRenderingState {
 	RenderRect *dstClip{nullptr};
 	RenderRect bounds{0, 0, 0, 0};
 	RenderRect offset{0, 0, 0, 0};
+	float2 logicalSize{0, 0};
 	bool shiftSpriteDrawByBorderPadding{true};
 	int tightlyFit{FIT_MODE::FIT_BOTH};
 	int segmentIndex{-1};
@@ -290,6 +291,7 @@ struct TextRenderingState {
 		segmentIndex                   = -1;
 		bounds                         = RenderRect();
 		offset                         = RenderRect();
+		logicalSize                    = {0, 0};
 	}
 };
 

@@ -2365,9 +2365,9 @@ int ONScripter::getspsizeCommand() {
 	AnimationInfo &sprite = lsp2 ? sprite2_info[no] : sprite_info[no];
 
 	script_h.readVariable();
-	script_h.setInt(&script_h.current_variable, sprite.orig_pos.w);
+	script_h.setInt(&script_h.current_variable, sprite.orig_pos.w - sprite.image_size_extension.x * (sprite.vertical_cells ? 1 : sprite.num_of_cells));
 	script_h.readVariable();
-	script_h.setInt(&script_h.current_variable, sprite.orig_pos.h);
+	script_h.setInt(&script_h.current_variable, sprite.orig_pos.h - sprite.image_size_extension.y * (sprite.vertical_cells ? sprite.num_of_cells : 1));
 	if (script_h.hasMoreArgs()) {
 		script_h.readVariable();
 		script_h.setInt(&script_h.current_variable, sprite.num_of_cells);
@@ -2980,10 +2980,11 @@ int ONScripter::drawspCommand() {
 	int old_cell_no = si.current_cell;
 	si.visible      = true;
 	si.setCell(cell_no);
-	RenderRect pos{si.current_cell * si.pos.w, 0, si.pos.w, si.pos.h};
+	RenderRect pos{si.vertical_cells ? 0 : si.current_cell * si.pos.w,
+	               si.vertical_cells ? si.current_cell * si.pos.h : 0, si.pos.w, si.pos.h};
 	if (alpha < 255)
 		GPU_SetRGBA(si.gpu_image, alpha, alpha, alpha, alpha);
-	gpu.copyGPUImage(si.gpu_image, &pos, nullptr, draw_gpu->target, x, y);
+	gpu.copyGPUImage(si.gpu_image, &pos, nullptr, draw_gpu->target, x + si.image_position_offset.x, y + si.image_position_offset.y);
 	si.setCell(old_cell_no);
 	if (alpha < 255)
 		GPU_SetRGBA(si.gpu_image, 255, 255, 255, 255);

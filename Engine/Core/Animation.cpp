@@ -245,7 +245,6 @@ RenderImage *ensureBigImageCellCache(AnimationInfo *info, int base_cell_off_x, i
 	return cache;
 }
 
-constexpr int ScrollableTextCacheMinimumPadding = 12;
 
 void appendScrollableTextCacheInt(std::string &key, int value) {
 	key.append(std::to_string(value));
@@ -292,36 +291,12 @@ std::string makeScrollableTextCacheKey(const std::string &text, Fontinfo fi, int
 	return key;
 }
 
-int scrollableTextCachePadding(TextRenderingState &state) {
-	int padding = ScrollableTextCacheMinimumPadding;
-	auto inspectPiece = [&](DialoguePiece &piece) {
-		padding = std::max(padding, piece.borderPadding);
-		for (const auto &fi : piece.fontInfos) {
-			const auto &style = fi.style();
-			padding           = std::max(padding, fi.borderPadding);
-			if (style.is_border)
-				padding = std::max(padding, style.border_width);
-			if (style.is_shadow) {
-				padding = std::max(padding, std::abs(style.shadow_distance[0]));
-				padding = std::max(padding, std::abs(style.shadow_distance[1]));
-			}
-		}
-	};
-	for (auto &seg : state.segments) {
-		for (auto &run : seg.runs) {
-			for (auto &piece : run.pieces) inspectPiece(piece);
-			for (auto &piece : run.rubyPieces) inspectPiece(piece);
-		}
-	}
-	return padding + 2;
-}
-
 void freeScrollableCachedText(AnimationInfo::ScrollableInfo::CachedText &cached) {
 	if (cached.image)
 		gpu.freeImage(cached.image);
 	cached.image = nullptr;
 	cached.key.clear();
-	cached.padding = 0;
+	cached.offset = {0, 0};
 }
 
 void setSpriteRGBA(RenderImage *src, const AnimationInfo *ai, int alpha) {
@@ -656,6 +631,13 @@ void ONScripter::printBigImageCellCacheTelemetry() const {
 }
 
 void ONScripter::setupAnimationInfo(AnimationInfo *anim, Fontinfo *info) {
+	if (anim->trans_mode != AnimationInfo::TRANS_STRING &&
+	    (anim->image_position_offset.x != 0 || anim->image_position_offset.y != 0 ||
+	     anim->image_size_extension.x != 0 || anim->image_size_extension.y != 0)) {
+		anim->image_position_offset = {0, 0};
+		anim->image_size_extension = {0, 0};
+		UpdateAnimPosXY(anim);
+	}
 	if (anim->gpu_image && !anim->stale_image) {
 		anim->exists = true;
 		return;
@@ -712,8 +694,16 @@ void ONScripter::setupAnimationInfo(AnimationInfo *anim, Fontinfo *info) {
 
 			if (i == 0) {
 				dlgCtrl.prepareForRendering(anim->file_name, f_info, state, w, h);
+				anim->image_position_offset = {-state.offset.x, -state.offset.y};
+				anim->image_size_extension = {w - state.logicalSize.x, h - state.logicalSize.y};
+				if (anim->type != SPRITE_LSP2) {
+					anim->pos.x += anim->image_position_offset.x;
+					anim->pos.y += anim->image_position_offset.y;
+				}
 				if (w == 0 || h == 0)
 					break;
+				if (anim->num_of_cells <= 0 || (anim->vertical_cells ? h : w) > UINT16_MAX / anim->num_of_cells)
+					errorAndExit("Text sprite cells exceed the supported image dimensions");
 
 				if (!anim->vertical_cells)
 					w *= anim->num_of_cells;
@@ -1251,7 +1241,7 @@ void ONScripter::drawSpecialScrollable(RenderTarget *target, AnimationInfo *info
 
 		auto &cached = si.textCache[j];
 		if (cached.image && cached.key == cacheKey) {
-			gpu.copyGPUImage(cached.image, nullptr, &localClip, target, textX - cached.padding, textY - cached.padding);
+			gpu.copyGPUImage(cached.image, nullptr, &localClip, target, textX - cached.offset.x, textY - cached.offset.y);
 			continue;
 		}
 		if (cached.image)
@@ -1263,20 +1253,15 @@ void ONScripter::drawSpecialScrollable(RenderTarget *target, AnimationInfo *info
 		uint16_t tw = 0, th = 0;
 		dlgCtrl.prepareForRendering(text.c_str(), fi, state, tw, th);
 		if (tw > 0 && th > 0) {
-			const int padding = scrollableTextCachePadding(state);
-			const int imageW  = std::min<int>(0xffff, static_cast<int>(tw) + padding * 2);
-			const int imageH  = std::min<int>(0xffff, static_cast<int>(th) + padding * 2);
-			RenderImage *textImage = gpu.createImage(imageW, imageH, 4);
+			RenderImage *textImage = gpu.createImage(tw, th, 4);
 			GPU_GetTarget(textImage);
 			gpu.clear(textImage->target, 0, 0, 0, 0);
-			state.offset.x = padding;
-			state.offset.y = padding;
 			state.dst.target = textImage->target;
 			dlgCtrl.render(state);
 			cached.image   = textImage;
 			cached.key     = cacheKey;
-			cached.padding = padding;
-			gpu.copyGPUImage(textImage, nullptr, &localClip, target, textX - padding, textY - padding);
+			cached.offset = {state.offset.x, state.offset.y};
+			gpu.copyGPUImage(textImage, nullptr, &localClip, target, textX - cached.offset.x, textY - cached.offset.y);
 		}
 		state.clear();
 	}
@@ -1870,8 +1855,12 @@ void ONScripter::drawToGPUTarget(RenderTarget *target, AnimationInfo *info, int 
 	bool opacityTransform = info->darkenHue.r < 255 || info->darkenHue.g < 255 ||
 	                        info->darkenHue.b < 255 || info->trans < 255;
 
-	float coord_x = info->rot == 0 && !info->has_hotspot ? info->pos.x : info->rendering_center.x;
-	float coord_y = info->rot == 0 && !info->has_hotspot ? info->pos.y : info->rendering_center.y;
+	const bool paddedAffine = info->type == SPRITE_LSP2 &&
+	                          (info->image_position_offset.x != 0 || info->image_position_offset.y != 0 ||
+	                           info->image_size_extension.x != 0 || info->image_size_extension.y != 0);
+	const bool computedCenter = info->rot != 0 || info->has_hotspot || info->has_scale_center || paddedAffine;
+	float coord_x = computedCenter ? info->rendering_center.x : info->pos.x;
+	float coord_y = computedCenter ? info->rendering_center.y : info->pos.y;
 
 	// Adjust by sprite-specific camera
 	coord_x += info->camera.pos.x;
