@@ -457,7 +457,7 @@ int ONScripter::playSound(const char *filename, int format, bool loop_flag, int 
 
 			setMusicVolume(music_volume, volume_on_flag);
 			Mix_HookMusicFinished(musicFinishCallback);
-			if (Mix_PlayMusic(music_info_local, music_play_loop_flag ? -1 : 0) == 0) {
+			if (Mix_PlayMusic(music_info_local, loop_flag ? -1 : 0) == 0) {
 				Lock lock(&playSoundThreadedLock);
 				assert(!music_buffer);
 				music_info          = music_info_local;

@@ -1581,13 +1581,12 @@ int ONScripter::mp3Command() {
 		mp3save_flag = false;
 	}
 
-	music_play_loop_flag = loop_flag;
-
 	const char *buf = script_h.readFilePath();
 	if (!fast_switch || buf[0] == '\0')
 		mp3stopCommand();
 
 	if (buf[0] != '\0') {
+		music_play_loop_flag = loop_flag;
 		int tmp = music_volume;
 		script_h.setStr(&music_file_name, buf);
 
