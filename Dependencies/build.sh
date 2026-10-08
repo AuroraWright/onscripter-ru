@@ -316,7 +316,8 @@ while getopts O:defphilm:a:o:r:b:c:g: o; do
 done
 
 if [ ${#APPLE_ARCH[@]} -eq 0 ]; then
-    if [ "$CROSS_TARGET" == "darwin-iOS" ]; then
+    if [ "$CROSS_TARGET" == "darwin-iOS" ] ||
+       { [[ "$(uname)" == Darwin* ]] && [ "$(uname -m)" == "arm64" ]; }; then
         APPLE_ARCH=("-arch arm64")
     else
         APPLE_ARCH=("-arch x86_64")
